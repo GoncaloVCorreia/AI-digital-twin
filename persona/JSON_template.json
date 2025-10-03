@@ -1,0 +1,71 @@
+{
+  "name": "NOME COMPLETO",
+  "age": 0,
+  "location": "Cidade, País",
+  "role": "Função atual ou área (ex: Estudante, Junior Developer, Engenheiro de Dados)",
+
+  "summary": "Breve apresentação em 2-3 frases sobre quem és, tua formação e interesses.",
+
+  "education": [
+    {
+      "degree": "Nome do curso ou grau (ex: Licenciatura em Engenharia Informática)",
+      "institution": "Universidade/Escola",
+      "year": "Ano de conclusão ou 'em curso'"
+    }
+  ],
+
+  "experience": [
+    {
+      "title": "Cargo ou posição (ex: Estagiário em Desenvolvimento Web)",
+      "company": "Nome da empresa/organização",
+      "period": "Datas (ex: Jun 2023 - Set 2023)",
+      "responsibilities": [
+        "Responsabilidade 1",
+        "Responsabilidade 2",
+        "Responsabilidade 3"
+      ]
+    }
+  ],
+
+  "skills": {
+    "technical": [
+      "Linguagem/tecnologia 1",
+      "Linguagem/tecnologia 2"
+    ],
+    "soft": [
+      "Competência interpessoal 1",
+      "Competência interpessoal 2"
+    ]
+  },
+
+  "strengths": [
+    "Ponto forte 1",
+    "Ponto forte 2",
+    "Ponto forte 3"
+  ],
+
+  "weaknesses": [
+    "Ponto fraco 1",
+    "Ponto fraco 2"
+  ],
+
+  "goals": [
+    "Objetivo de curto prazo (ex: entrar numa equipa de IA aplicada)",
+    "Objetivo de médio prazo (ex: crescer como engenheiro de software)"
+  ],
+
+  "hobbies": [
+    "Hobby 1",
+    "Hobby 2",
+    "Hobby 3"
+  ],
+
+  "personality": {
+    "tone": "Como deves soar (ex: profissional, descontraído, confiante)",
+    "keywords": [
+      "adjetivo 1",
+      "adjetivo 2",
+      "adjetivo 3"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 from typing import Annotated
 from typing_extensions import TypedDict
 import os
+import json
 from langgraph.checkpoint.memory import InMemorySaver
 
 
@@ -42,13 +43,59 @@ graph_builder.add_edge("chatbot", END)
 memory = InMemorySaver()
 graph = graph_builder.compile(checkpointer=memory)
 
+def load_persona(name: str):
+    path = f"persona/persona_{name}.json"
+    with open(path, "r") as f:
+        return json.load(f)
+    
+def build_promt(persona):
+    prompt = f"""
+    Tu és o digital twin de {persona['name']} ({persona['age']} anos, de {persona['location']}).
+    Resumo: {persona['summary']}
+    Formação: {', '.join([edu['degree'] + ' em ' + edu['institution'] for edu in persona['education']])}.
+    Competências técnicas: {', '.join(persona['skills']['technical'])}.
+    Competências interpessoais: {', '.join(persona['skills']['soft'])}.
+    Pontos fortes: {', '.join(persona['strengths'])}.
+    Pontos fracos: {', '.join(persona['weaknesses'])}.
+    Objetivos: {', '.join(persona['goals'])}.
 
+    Responde sempre como se fosses {persona['name']} numa entrevista de emprego. Mas responde de forma concisa e direta, sem divagar.
+    Caso o input recebido não faça sentido, pede para reformular a pergunta.
+    """
+    return prompt
 
-def stream_graph_updates(user_input: str):
+def list_personas():
+    persona_dir = "persona"
+    personas = []
+    for filename in os.listdir(persona_dir):
+        if filename.startswith("persona_") and filename.endswith(".json"):
+            personas.append(filename[len("persona_"):-len(".json")])
+    return personas
+
+def select_persona():
+    personas = list_personas()
+    print("Escolha uma persona para conversar:")
+    for idx, name in enumerate(personas, 1):
+        print(f"{idx}. {name}")
+    while True:
+        try:
+            choice = int(input("Número da persona: "))
+            if 1 <= choice <= len(personas):
+                return personas[choice - 1]
+        except Exception:
+            pass
+        print("Escolha inválida. Tente novamente.")
+
+def stream_graph_updates(user_input: str, persona_name: str):
+    #first message in the message history is the system message
+    system_message = build_promt(load_persona(persona_name))
     last_ai_message = None
 
+    # ensure the system message is the first message in the conversation
+    system_message_obj = {"role": "system", "content": system_message}
     events = graph.stream(
-        {"messages": [{"role": "user", "content": user_input}]},
+        {"messages": [system_message_obj, {"role": "user", "content": user_input}],
+         },
         config,
         stream_mode="values",
     )
@@ -62,16 +109,18 @@ def stream_graph_updates(user_input: str):
         print("Assistant:", last_ai_message.content)
 
 
-while True:
-    try:
-        user_input = input("User: ")
-        if user_input.lower() in ["quit", "exit", "q"]:
-            print("Goodbye!")
+if __name__ == "__main__":
+    persona_name = select_persona()
+    while True:
+        try:
+            user_input = input("User: ")
+            if user_input.lower() in ["quit", "exit", "q"]:
+                print("Goodbye!")
+                break
+            stream_graph_updates(user_input, persona_name)
+        except:
+            # fallback if input() is not available
+            user_input = "??"
+            print("User: " + user_input)
+            stream_graph_updates(user_input, persona_name)
             break
-        stream_graph_updates(user_input)
-    except:
-        # fallback if input() is not available
-        user_input = "What do you know about LangGraph?"
-        print("User: " + user_input)
-        stream_graph_updates(user_input)
-        break

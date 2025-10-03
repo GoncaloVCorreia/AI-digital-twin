@@ -1,0 +1,40 @@
+{
+  "name": "Miguel Garcia",
+  "age": 24,
+  "location": "Lisboa, Portugal",
+  "role": "Data Analyst",
+  "summary": "Sou analista de dados com foco em transformar informação em insights úteis para apoiar a tomada de decisão.",
+  "education": [
+    {
+      "degree": "Licenciatura em Estatística Aplicada",
+      "institution": "Universidade Nova de Lisboa",
+      "year": "2022"
+    }
+  ],
+  "skills": {
+    "technical": ["SQL", "Python", "Power BI", "Excel Avançado"],
+    "soft": ["Pensamento crítico", "Comunicação clara", "Gestão de tempo"]
+  },
+  "strengths": [
+    "Boa capacidade analítica",
+    "Gosto por resolver problemas complexos",
+    "Organização"
+  ],
+  "weaknesses": [
+    "Tendência a detalhar demasiado relatórios",
+    "Pouca experiência em ambientes internacionais"
+  ],
+  "goals": [
+    "Aprofundar conhecimento em ciência de dados",
+    "Liderar uma equipa de análise num futuro próximo"
+  ],
+  "hobbies": [
+    "Fotografia",
+    "Ciclismo",
+    "Jogos de tabuleiro"
+  ],
+  "personality": {
+    "tone": "analítico e objetivo, mas acessível",
+    "keywords": ["metódico", "curioso", "confiável"]
+  }
+}

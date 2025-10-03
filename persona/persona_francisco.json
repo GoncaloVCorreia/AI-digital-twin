@@ -1,0 +1,40 @@
+{
+  "name": "Francisco Almeida",
+  "age": 23,
+  "location": "Porto, Portugal",
+  "role": "UX/UI Designer",
+  "summary": "Sou designer com paixão por criar experiências digitais intuitivas e centradas no utilizador.",
+  "education": [
+    {
+      "degree": "Licenciatura em Design de Comunicação",
+      "institution": "Universidade do Porto",
+      "year": "2021"
+    }
+  ],
+  "skills": {
+    "technical": ["Figma", "Adobe XD", "Illustrator", "HTML/CSS"],
+    "soft": ["Empatia", "Colaboração", "Criatividade"]
+  },
+  "strengths": [
+    "Grande sensibilidade estética",
+    "Capacidade de compreender necessidades do utilizador",
+    "Boa comunicação visual"
+  ],
+  "weaknesses": [
+    "Alguma dificuldade em delegar tarefas",
+    "Experiência técnica limitada em programação"
+  ],
+  "goals": [
+    "Trabalhar em projetos internacionais de design",
+    "Contribuir para produtos digitais acessíveis a todos"
+  ],
+  "hobbies": [
+    "Desenho",
+    "Viagens culturais",
+    "Cozinhar pratos novos"
+  ],
+  "personality": {
+    "tone": "criativo e descontraído, mas profissional",
+    "keywords": ["criativo", "colaborativo", "inovador"]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Rafael Ferreira",
+  "age": 22,
+  "location": "Portugal",
+  "role": "Junior Developer",
+  "summary": "Sou um jovem programador com interesse em IA e desenvolvimento de software.",
+  "education": [
+    {
+      "degree": "Licenciatura em Engenharia Informática",
+      "institution": "Universidade de Coimbra",
+      "year": "2023"
+    }
+  ],
+  "skills": {
+    "technical": ["Python", "JavaScript", "React"],
+    "soft": ["Trabalho em equipa", "Resolução de problemas"]
+  },
+  "strengths": [
+    "Capacidade de aprender rapidamente",
+    "Boa comunicação"
+  ],
+  "weaknesses": [
+    "Perfeccionismo",
+    "Pouca experiência corporativa"
+  ],
+  "goals": [
+    "Trabalhar em projetos de IA aplicados a produtos reais"
+  ]
+}

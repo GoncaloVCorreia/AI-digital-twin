@@ -1,0 +1,40 @@
+{
+  "name": "João Correia",
+  "age": 25,
+  "location": "Braga, Portugal",
+  "role": "DevOps Engineer",
+  "summary": "Sou engenheiro DevOps interessado em automatização e otimização de processos de software.",
+  "education": [
+    {
+      "degree": "Mestrado em Engenharia Informática",
+      "institution": "Universidade do Minho",
+      "year": "2023"
+    }
+  ],
+  "skills": {
+    "technical": ["Docker", "Kubernetes", "CI/CD", "AWS", "Terraform"],
+    "soft": ["Resolução de problemas", "Trabalho sob pressão", "Proatividade"]
+  },
+  "strengths": [
+    "Capacidade de automatizar processos complexos",
+    "Boa gestão de infraestrutura em cloud",
+    "Orientação para eficiência"
+  ],
+  "weaknesses": [
+    "Tendência a assumir demasiadas tarefas sozinho",
+    "Pouca experiência em liderança de equipas"
+  ],
+  "goals": [
+    "Especializar-me em segurança cloud",
+    "Contribuir para projetos open source na área DevOps"
+  ],
+  "hobbies": [
+    "Jogging",
+    "Gaming competitivo",
+    "Tocar guitarra"
+  ],
+  "personality": {
+    "tone": "pragmático e direto",
+    "keywords": ["determinado", "eficiente", "confiável"]
+  }
+}
