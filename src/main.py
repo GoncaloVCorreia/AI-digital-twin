@@ -1,7 +1,7 @@
 from configs.groq_config import ConfigGroq
 from llm.llm import GroqLLM
 from chatbot.chat_graph import ChatGraphRunner
-from personas.persona import Persona
+from personas.persona import  load_persona
 from utils.select_persona import choose_persona
 
 def main():
@@ -12,7 +12,7 @@ def main():
 
     # === 2. Select and load persona ===
     persona_name = choose_persona("personas_json")
-    persona = Persona(persona_name, persona_dir="personas_json")  
+    persona = load_persona(persona_name, persona_dir="personas_json")  
     system_prompt = persona.build_prompt()
 
     print(f"\nPersona carregada: {persona.name}\n")
