@@ -1,0 +1,60 @@
+.app-container {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 2rem;
+}
+
+.persona-selector {
+  margin-bottom: 1rem;
+}
+
+.persona-selector button {
+  margin: 0 5px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #eaeaea;
+}
+
+.persona-selector button.selected {
+  background: #007bff;
+  color: white;
+}
+
+.chat-window {
+  width: 600px;
+  margin: auto;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 1rem;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.message {
+  margin: 8px 0;
+}
+
+.message.user {
+  text-align: right;
+}
+
+.bubble {
+  display: inline-block;
+  padding: 10px 15px;
+  border-radius: 16px;
+  background: #f1f1f1;
+}
+
+.message.user .bubble {
+  background: #007bff;
+  color: white;
+}
