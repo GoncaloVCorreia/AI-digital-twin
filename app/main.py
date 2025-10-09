@@ -4,6 +4,7 @@ import logging
 
 from app.database import Base, engine
 from app.routers.auth import router as auth_router
+from app.routers.personas import router as personas_router
 from app.middleware.logging import RequestLoggingMiddleware, SecurityHeadersMiddleware
 
 # Set up logging
@@ -20,8 +21,9 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 # Include routers
 app.include_router(auth_router)
-
+app.include_router(personas_router)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
- 
+
+
