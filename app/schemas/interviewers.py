@@ -37,7 +37,6 @@ class UserUpdate(BaseModel):
     """User update schema."""
     full_name: Optional[str] = Field(None, min_length=1, max_length=100)
     
-
 class User(UserBase):
     """User response schema."""
     id: int
@@ -56,6 +55,7 @@ class Token(BaseModel):
     """JWT token response."""
     access_token: str
     token_type: str = "bearer"
+    username: str
     expires_in: int
 
 class TokenData(BaseModel):
