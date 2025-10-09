@@ -5,10 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "anyio>=4.11.0",
     "dotenv>=0.9.9",
+    "fastapi>=0.118.2",
     "groq>=0.32.0",
     "langchain>=0.3.27",
     "langchain-groq>=0.3.8",
     "langgraph>=0.6.8",
     "langsmith>=0.4.32",
+    "python-dotenv>=1.1.1",
+    "uvicorn[standard]>=0.37.0",
+    "websockets>=15.0.1",
 ]
