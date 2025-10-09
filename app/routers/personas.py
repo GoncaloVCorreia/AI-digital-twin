@@ -6,7 +6,9 @@ from __future__ import annotations
 
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from app.utils.dependencies import get_current_user
 from sqlalchemy.orm import Session
+from app.schemas.interviewers import User
 from sqlalchemy.exc import IntegrityError
 
 from app.database import get_db
@@ -22,9 +24,11 @@ router = APIRouter(prefix="/personas", tags=["personas"])
 
 
 @router.post("/", response_model=Persona, status_code=status.HTTP_201_CREATED)
-def create_persona(payload: PersonaCreate, db: Session = Depends(get_db)):
+def create_persona(payload: PersonaCreate, 
+                   db: Session = Depends(get_db),
+                   current_user: User = Depends(get_current_user)):
     try:
-        created = PersonaService.create_persona(db, payload)
+        created = PersonaService.create_persona(db, payload, current_user.id)
         return created
     except IntegrityError:
         # If you later add a UNIQUE constraint (e.g., name) we surface 409 here.
@@ -40,6 +44,7 @@ def list_personas(
     limit: int = Query(50, ge=1, le=100),
     search: Optional[str] = Query(None, max_length=128),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     skip = (page - 1) * limit
     items, total = PersonaService.list_personas(db, skip=skip, limit=limit, search=search)
@@ -54,7 +59,9 @@ def list_personas(
 
 
 @router.get("/{persona_id}", response_model=Persona)
-def get_persona(persona_id: int, db: Session = Depends(get_db)):
+def get_persona(persona_id: int, 
+                db: Session = Depends(get_db),
+                current_user: User = Depends(get_current_user),):
     row = PersonaService.get_persona(db, persona_id)
     if not row:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Persona not found")
@@ -66,6 +73,8 @@ def update_persona(
     persona_id: int,
     payload: PersonaUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+
 ):
     updated = PersonaService.update_persona(db, persona_id, payload)
     if not updated:
@@ -74,7 +83,12 @@ def update_persona(
 
 
 @router.delete("/{persona_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_persona(persona_id: int, db: Session = Depends(get_db)):
+def delete_persona(persona_id: int,
+                   db: Session = Depends(get_db),
+                    current_user: User = Depends(get_current_user),
+):
     ok = PersonaService.delete_persona(db, persona_id)
     if not ok:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Persona not found")
+    return ok
+    

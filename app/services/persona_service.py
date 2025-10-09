@@ -17,7 +17,7 @@ class PersonaService:
     """Business logic for personas."""
 
     @staticmethod
-    def create_persona(db: Session, data: PersonaCreate) -> PersonaModel:
+    def create_persona(db: Session, data: PersonaCreate, creator_id: int) -> PersonaModel:
         persona = PersonaModel(**data.model_dump())
         db.add(persona)
         try:
