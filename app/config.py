@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     #DATABASE_URL: Optional[str] = "sqlite:///./task_management.db"
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000", "http://192.168.1.111:8000"]
     
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     def assemble_cors_origins(cls, v: str | List[str]) -> List[str]:
