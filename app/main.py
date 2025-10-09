@@ -6,6 +6,9 @@ from app.database import Base, engine
 from app.routers.auth import router as auth_router
 from app.routers.personas import router as personas_router
 from app.middleware.logging import RequestLoggingMiddleware, SecurityHeadersMiddleware
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings  # or wherever your Settings class is
+
 
 # Set up logging
 logger = logging.getLogger("uvicorn.error")
@@ -14,6 +17,15 @@ logger = logging.getLogger("uvicorn.error")
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Digital Twin API")
+
+# ✅ Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],  # You can be specific if needed
+    allow_headers=["*"],
+)
 
 # Add custom middleware
 app.add_middleware(RequestLoggingMiddleware)
