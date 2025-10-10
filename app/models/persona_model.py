@@ -49,7 +49,4 @@ class Persona(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
    
-if __name__ == "__main__":
-    # Dev-only: create the table. In production, use Alembic migrations.
-    Base.metadata.create_all(bind=engine)
-    print("✅ Table 'personas' is ready.")
+
