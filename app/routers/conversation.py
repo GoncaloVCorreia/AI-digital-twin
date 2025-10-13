@@ -18,14 +18,14 @@ from app.utils.conversation import _msg_to_dict, _new_session_id
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 # --- Lazy init so importing this module doesn't hit Postgres in CI/tests ---
-+_runner = None
-+_llm = None
-+def _get_runner():
-+    global _runner, _llm
-+    if _runner is None:
-+        _llm = GroqLLM(ConfigGroq())
-+        _runner = ChatGraphRunner(_llm)
-+    return _runner
+_runner = None
+_llm = None
+def _get_runner():
+    global _runner, _llm
+    if _runner is None:
+        _llm = GroqLLM(ConfigGroq())
+        _runner = ChatGraphRunner(_llm)
+    return _runner
 
 # 1) Get ALL conversations (returns: id, interviewer_id, persona, session_id, messages, created_at)
 @router.get("/conversations", response_model=List[ConversationResponse])
