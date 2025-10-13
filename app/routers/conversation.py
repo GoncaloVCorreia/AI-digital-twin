@@ -17,10 +17,16 @@ from app.utils.conversation import _msg_to_dict, _new_session_id
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
-# --- Initialize global chatbot engine once ---
-config = ConfigGroq()
-llm = GroqLLM(config)
-runner = ChatGraphRunner(llm)
+# --- Lazy init so importing this module doesn't hit Postgres in CI/tests ---
++_runner = None
++_llm = None
++def _get_runner():
++    global _runner, _llm
++    if _runner is None:
++        _llm = GroqLLM(ConfigGroq())
++        _runner = ChatGraphRunner(_llm)
++    return _runner
+
 # 1) Get ALL conversations (returns: id, interviewer_id, persona, session_id, messages, created_at)
 @router.get("/conversations", response_model=List[ConversationResponse])
 async def list_conversations(
@@ -63,7 +69,8 @@ async def chat_respond(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-     # NEW: ensure we have a session_id
+    runner = _get_runner()
+    # NEW: ensure we have a session_id
     session_id = data.session_id or _new_session_id()
 
     # 1) Persona → system prompt
