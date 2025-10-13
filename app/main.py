@@ -5,6 +5,7 @@ import logging
 from app.database import Base, engine
 from app.routers.auth import router as auth_router
 from app.routers.personas import router as personas_router
+from app.routers.conversation import router as conversation_router
 from app.middleware.logging import RequestLoggingMiddleware, SecurityHeadersMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings  # or wherever your Settings class is
@@ -34,6 +35,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 # Include routers
 app.include_router(auth_router)
 app.include_router(personas_router)
+app.include_router(conversation_router)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
