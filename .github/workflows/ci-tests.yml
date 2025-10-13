@@ -19,7 +19,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Cache do ambiente do uv e dependências
       - name: Cache uv & venv
         uses: actions/cache@v4
         with:
@@ -39,8 +38,9 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run tests with coverage
+        env:
+          GROQ_API_KEY: test   # <- dummy p/ desbloquear Settings no CI
         run: |
-          # Gera relatório no terminal e HTML
           uv run pytest -v --cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=80
 
       - name: Upload coverage HTML report
