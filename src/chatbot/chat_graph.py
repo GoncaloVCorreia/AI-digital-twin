@@ -11,10 +11,16 @@ DATABASE_URL = "postgresql://correia:postgres@localhost/ai_project_db?options=-c
 class ChatState(TypedDict):
     messages: Annotated[List, add_messages]
     last_ai_message: NotRequired[str]
-
+    
+def make_checkpointer():
+    if os.getenv("USE_MEMORY_CHECKPOINTER") == "1":
+        return MemorySaver()
+    url = DATABASE_URL
+    return PostgresSaver.from_conn_string(url)
+    
 class ChatGraphRunner:
     def __init__(self, llm):
-        self._memory_cm = PostgresSaver.from_conn_string(DATABASE_URL)
+        self._memory_cm = mmake_checkpointer()
         self.memory = self._memory_cm.__enter__()
         self.memory.setup()
 
