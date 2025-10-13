@@ -1,0 +1,27 @@
+.persona-selector {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-right: 20px;
+  height: 300px; /* altura suficiente para os círculos */
+  padding-left: 25px; /* margem esquerda para afastar os círculos */
+}
+
+.persona-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #f1f1f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.6s ease;
+}
+
+.persona-name {
+  font-size: 0.8rem;
+  text-align: center;
+}
