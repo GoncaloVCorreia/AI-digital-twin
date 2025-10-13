@@ -20,7 +20,7 @@ def make_checkpointer():
     
 class ChatGraphRunner:
     def __init__(self, llm):
-        self._memory_cm = mmake_checkpointer()
+        self._memory_cm = make_checkpointer()
         self.memory = self._memory_cm.__enter__()
         self.memory.setup()
 
