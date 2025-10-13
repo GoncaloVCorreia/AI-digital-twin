@@ -22,17 +22,6 @@
   color: white;
 }
 
-.chat-window {
-  width: 600px;
-  margin: auto;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 1rem;
-  height: 500px;
-  display: flex;
-  flex-direction: column;
-}
-
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -57,4 +46,23 @@
 .message.user .bubble {
   background: #007bff;
   color: white;
+}
+
+.chat-view {
+  position: relative;
+}
+
+.chat-title {
+  text-align: center;
+  margin-bottom: 120px; /* espaço suficiente */
+}
+
+.persona-target {
+  position: absolute;
+  top: 60px; /* abaixo do título */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px; /* espaçamento entre múltiplos círculos ativos */
+  z-index: 20;
 }

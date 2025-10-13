@@ -1,16 +1,62 @@
-import React, { useState } from "react";
-import PersonaSelector from "./components/PersonaSelector/PersonaSelector";
-import ChatWindow from "./components/ChatWindow/ChatWindow";
-import "./styles.css";  // estilos globais
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage/HomePage";
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
+import ChatView from "./pages/ChatView/ChatView";
+import ProtectedRoute from "./utils/ProtectedRoute";
+import PublicRoute from "./utils/PublicRoute";
 
-export default function App() {
-  const [selectedPersona, setSelectedPersona] = useState("Rafael");
-
+function App() {
   return (
-    <div className="app-container">
-      <h1>Digital Twin Chatbot 🤖</h1>
-      <PersonaSelector selected={selectedPersona} setSelected={setSelectedPersona} />
-      <ChatWindow persona={selectedPersona} />
-    </div>
+    <Router>
+      <Routes>
+        {/* Páginas públicas (bloqueadas se o user estiver logado) */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/chat"
+          element={
+            <PublicRoute>
+              <ChatView />
+            </PublicRoute>
+          }
+        />
+
+        {/* Páginas protegidas */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        {/* < Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <ChatView />
+            </ProtectedRoute>
+          }
+        /> */}
+      </Routes>
+    </Router>
   );
 }
+
+export default App;

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import MessageBubble from "../MessageBubble/MessageBubble.jsx";
 import { sendMessageToMockAPI } from "../../api/mockApi";
+import "./ChatWindow.css";
 
 export default function ChatWindow({ persona }) {
   const [chat, setChat] = useState([]);
