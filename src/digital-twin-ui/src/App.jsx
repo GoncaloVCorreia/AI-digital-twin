@@ -28,15 +28,6 @@ function App() {
           }
         />
 
-        <Route
-          path="/chat"
-          element={
-            <PublicRoute>
-              <ChatView />
-            </PublicRoute>
-          }
-        />
-
         {/* Páginas protegidas */}
         <Route
           path="/"
@@ -46,14 +37,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* < Route
+        < Route
           path="/chat"
           element={
             <ProtectedRoute>
               <ChatView />
             </ProtectedRoute>
           }
-        /> */}
+        />
       </Routes>
     </Router>
   );
