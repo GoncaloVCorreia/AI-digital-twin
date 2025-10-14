@@ -1,17 +1,21 @@
-"""
-Database configuration and session management.
-"""
-
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-# Replace with your actual database URL
-import os
+# Load environment variables from .env file
+load_dotenv()
+
+# Get the database URL from the environment
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+psycopg://correia:postgres@db:5432/ai_project_db"
 )
+
+
+if not DATABASE_URL:
+    raise ValueError("❌ DATABASE_URL not found in environment variables")
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL, echo=True,  connect_args={"options": "-c client_encoding=UTF8"}
@@ -33,3 +37,5 @@ def get_db():
         yield db
     finally:
         db.close()
+
+

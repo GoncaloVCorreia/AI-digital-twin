@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str
     
     # Database
-    #DATABASE_URL: Optional[str] = "sqlite:///./task_management.db"
+    DATABASE_URL: Optional[str] = "sqlite:///./task_management.db"
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000", "http://192.168.1.111:8000"]
