@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: correia
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_project_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    command: postgres -c client_encoding=UTF8
+
+  app:
+    build: .
+    container_name: ai_project_app
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql+psycopg://correia:postgres@db:5432/ai_project_db
+      CHECKPOINT_URL: postgresql://correia:postgres@db:5432/ai_project_db?options=-c%20client_encoding%3DUTF8
+      BACKEND_CORS_ORIGINS: '["*"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app               # hot-reload during dev
+    depends_on:
+      - db
+
+volumes:
+  pg_data:

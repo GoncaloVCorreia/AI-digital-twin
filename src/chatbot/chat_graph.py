@@ -7,7 +7,10 @@ from typing import Annotated, TypedDict, List, Dict
 from typing_extensions import NotRequired
 import os
 
-DATABASE_URL = "postgresql://correia:postgres@localhost/ai_project_db?options=-c%20client_encoding%3DUTF8"
+CHECKPOINT_URL = os.getenv(
+    "CHECKPOINT_URL",
+    "postgresql://correia:postgres@db:5432/ai_project_db?options=-c%20client_encoding%3DUTF8"
+)
 
 class ChatState(TypedDict):
     messages: Annotated[List, add_messages]
@@ -15,7 +18,7 @@ class ChatState(TypedDict):
     
 class ChatGraphRunner:
     def __init__(self, llm):
-        self._memory_cm = PostgresSaver.from_conn_string(DATABASE_URL)
+        self._memory_cm = PostgresSaver.from_conn_string(CHECKPOINT_URL)
         self.memory = self._memory_cm.__enter__()
         self.memory.setup()
 
