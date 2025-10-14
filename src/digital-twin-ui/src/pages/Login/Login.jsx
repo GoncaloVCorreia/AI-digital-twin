@@ -46,6 +46,7 @@ export default function Login() {
 
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("username", form.username); 
+      localStorage.setItem("id", data.id); // store user ID
       console.log("Login bem-sucedido:", data);
 
       navigate("/");

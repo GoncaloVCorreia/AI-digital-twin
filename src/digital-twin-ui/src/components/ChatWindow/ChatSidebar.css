@@ -15,17 +15,19 @@
 .chat-sidebar {
   width: 250px;
   background: #f8f8f8;
-  /* sidebar on the right: separate with left border */
   border-left: 1px solid #ddd;
   border-top: 1px solid #ddd;
-  padding: 10px;
+  padding: 18px 12px 12px 12px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  /* ensure sidebar fills parent height */
   height: 100%;
   max-height: 100%;
   min-height: 0;
-
-  /* align text to the right so items don't collide with personas on the left */
   text-align: right;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 
 /* Torna os itens clicáveis e separa visualmente cada conversa */
@@ -37,28 +39,42 @@
 
 .chat-sidebar ul li {
   cursor: pointer;
-  padding: 10px 8px;
-  border-bottom: 1px solid #e0e0e0;
-  transition: background 0.2s;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  border: none;
+  background: #f1f1f1;
+  color: #222;
+  font-size: 1rem;
   text-align: right;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  animation: fadeInBubble 0.4s;
 }
 
-/* Efeito hover acinzentado */
-.chat-sidebar ul li:hover {
-  background: #f0f0f0;
-}
-
-.chat-sidebar ul li:last-child {
-  border-bottom: none;
+@keyframes fadeInBubble {
+  from { opacity: 0; transform: translateY(10px);}
+  to { opacity: 1; transform: translateY(0);}
 }
 
 .chat-sidebar ul li.selected,
 .chat-sidebar ul li.active {
-  background: #ddd;
+  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
+  color: #fff;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
 
-/* ...existing code... */
+/* Efeito hover acinzentado */
+.chat-sidebar ul li:hover {
+  background: #e3e9f9;
+  color: #222;
+}
+
+.chat-sidebar ul li:last-child {
+  margin-bottom: 0;
+}
+
 .chat-item {
   padding: 8px 10px;
   border-radius: 8px;
@@ -103,8 +119,11 @@
     width: 100%;
     border-left: none;
     border-top: 1px solid #ddd;
-    text-align: left; /* better UX on mobile */
+    text-align: left;
+    border-radius: 0 0 10px 10px;
+    box-shadow: none;
   }
+  .chat-sidebar ul li,
   .chat-item,
   .chat-item .last-message {
     text-align: left;
@@ -112,24 +131,56 @@
 }
 
 .new-chat-btn {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: none;
-  background: #3a3a3a;
-  color: #fff;
+  width: 90%;
+  padding: 10px 0;
+  margin: 0 auto;
+  margin-bottom: 0;
+  font-size: 1rem;
   font-weight: 600;
   border-radius: 8px;
+  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  border: none;
   cursor: pointer;
   transition: background 0.2s;
-}
-.new-chat-btn:hover {
-  background: #555;
+  display: block;
 }
 
 .sidebar-title {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin: 0 0 18px 0;
+  color: #222;
+  letter-spacing: 0.5px;
   text-align: center;
+}
+
+.sidebar-header {
+  margin-bottom: 0;
+  text-align: center;
+  padding-bottom: 12px;
+  background: #f8f8f8;
+  /* sticky handled by .sidebar-header--sticky */
+}
+
+.sidebar-header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8f8f8;
+  border-bottom: 1px solid #e3e9f9;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  padding-bottom: 12px;
+}
+
+.sidebar-scrollable {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-top: 0;
+  padding-bottom: 20px; /* ensures last chat is fully visible */
+  box-sizing: border-box;
+  /* Prevent scrollbars on header */
 }
