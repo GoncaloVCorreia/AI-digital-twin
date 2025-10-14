@@ -1,0 +1,27 @@
+.message-bubble {
+  max-width: 70%;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 12px;
+  word-wrap: break-word;
+}
+
+/* Mensagens do user à direita */
+.message-bubble.user {
+  background-color: #3a3a3a;
+  color: #fff;
+  align-self: flex-end;
+}
+
+/* Mensagens do assistant / system à esquerda */
+.message-bubble.assistant {
+  background-color: #e5e5ea;
+  color: #000;
+  align-self: flex-start;
+}
+
+/* Adicione display flex à lista de mensagens para suportar align-self nos balões */
+.messages {
+  display: flex;
+  flex-direction: column;
+}

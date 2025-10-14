@@ -7,7 +7,7 @@ from typing import Annotated, TypedDict, List, Dict
 from typing_extensions import NotRequired
 import os
 
-DATABASE_URL = "postgresql://correia:postgres@localhost/ai_project_db?options=-c%20client_encoding%3DUTF8"
+DATABASE_URL = "postgresql://rafael:password@localhost/ai_project_db?options=-c%20client_encoding%3DUTF8"
 
 class ChatState(TypedDict):
     messages: Annotated[List, add_messages]

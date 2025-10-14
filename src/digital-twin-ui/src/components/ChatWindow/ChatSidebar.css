@@ -1,0 +1,135 @@
+.chat-container {
+  display: flex;
+  /* avoid forcing the page to scroll: limit internal height relative to viewport minus header/title */
+  max-height: none;
+  min-height: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-direction: row-reverse;
+  gap: 12px;
+  /* allow children to shrink inside the flex container */
+  min-height: 0;
+}
+
+/* ...existing code... */
+.chat-sidebar {
+  width: 250px;
+  background: #f8f8f8;
+  /* sidebar on the right: separate with left border */
+  border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  padding: 10px;
+  overflow-y: auto;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+
+  /* align text to the right so items don't collide with personas on the left */
+  text-align: right;
+}
+
+/* Torna os itens clicáveis e separa visualmente cada conversa */
+.chat-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chat-sidebar ul li {
+  cursor: pointer;
+  padding: 10px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background 0.2s;
+  text-align: right;
+}
+
+/* Efeito hover acinzentado */
+.chat-sidebar ul li:hover {
+  background: #f0f0f0;
+}
+
+.chat-sidebar ul li:last-child {
+  border-bottom: none;
+}
+
+.chat-sidebar ul li.selected,
+.chat-sidebar ul li.active {
+  background: #ddd;
+  font-weight: 600;
+}
+
+/* ...existing code... */
+.chat-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  /* make messages and names align to the right */
+  display: block;
+  text-align: right;
+}
+
+/* ...existing code... */
+.chat-item.active {
+  background: #ddd;
+  font-weight: 600;
+}
+
+/* make last-message smaller and aligned */
+.chat-item .last-message {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 0.9em;
+  text-align: right;
+}
+
+/* ensure main chat area stretches correctly when sidebar reversed */
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* allow the chat-window to shrink so the container doesn't force page scroll */
+  min-height: 0;
+}
+
+/* Responsive: stack vertically on small screens (sidebar becomes top) */
+@media (max-width: 600px) {
+  .chat-container {
+    flex-direction: column;
+    height: auto;
+  }
+  .chat-sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ddd;
+    text-align: left; /* better UX on mobile */
+  }
+  .chat-item,
+  .chat-item .last-message {
+    text-align: left;
+  }
+}
+
+.new-chat-btn {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  background: #3a3a3a;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.new-chat-btn:hover {
+  background: #555;
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+}
