@@ -43,7 +43,6 @@ class User(UserBase):
     username: str
     created_at: datetime
    
-    
     class Config:
         from_attributes = True
 
@@ -56,6 +55,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
     username: str
+    id:int
     expires_in: int
 
 class TokenData(BaseModel):
