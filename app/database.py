@@ -7,7 +7,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Replace with your actual database URL
-DATABASE_URL = "postgresql+psycopg://rafael:password@localhost/ai_project_db"
+import os
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg://correia:postgres@db:5432/ai_project_db"
+)
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL, echo=True,  connect_args={"options": "-c client_encoding=UTF8"}
