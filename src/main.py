@@ -54,6 +54,5 @@ def main():
         response = runner.stream_response(user_input, system_prompt, session_id)
         print(f"Assistant: {response}")
 
-if __name__ == "__main__":
-    main()
+
 

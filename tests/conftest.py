@@ -7,6 +7,8 @@ from app.main import app
 from app.database import Base, get_db
 from app import models  
 
+import os
+os.environ["USE_MEMORY_CHECKPOINTER"] = "1"
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(

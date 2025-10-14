@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +39,8 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          GROQ_API_KEY: test   # <- dummy p/ desbloquear Settings no CI
+          GROQ_API_KEY: test 
+          DATABASE_URL: sqlite:///./test.db  
         run: |
           uv run pytest -v --cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=80
 
