@@ -18,7 +18,8 @@ if not DATABASE_URL:
     raise ValueError("❌ DATABASE_URL not found in environment variables")
 
 # Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=True,  connect_args={"options": "-c client_encoding=UTF8"}
+)
 
 # Create a configured "SessionLocal" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
