@@ -39,7 +39,7 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          GROQ_API_KEY: test   # <- dummy p/ desbloquear Settings no CI
+          GROQ_API_KEY: test  
         run: |
           uv run pytest -v --cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=80
 
