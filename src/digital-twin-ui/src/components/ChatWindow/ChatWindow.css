@@ -1,22 +1,52 @@
 .chat-window {
-  width: 600px;
-  margin: auto;
-  border-radius: 10px;
-  padding: 1rem;
-  height: 500px;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
   background-color: #f7f7f7;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* sombra no lugar da borda */
-  border: none; /* remove border */
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.chat-window .messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
 }
 
 
 .messages {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
   margin-bottom: 12px;
   padding-right: 4px;
+  scroll-behavior: smooth; /* enable smooth scrolling when JS triggers scroll */
+
+  /* Prevent horizontal overflow from long words/strings */
+  overflow-x: hidden;            /* hide any accidental horizontal overflow */
+  word-break: break-word;        /* break long words when needed */
+  overflow-wrap: anywhere;       /* allow breaks anywhere for very long strings */
+  white-space: pre-wrap;         /* preserve line breaks but allow wrapping */
+}
+
+/* Ensure images inside messages don't overflow horizontally */
+.messages img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+/* Allow pre/code blocks to wrap sensibly */
+.messages pre,
+.messages code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .input-area {
@@ -61,16 +91,104 @@
   background: #555;
 }
 
+/* Responsivo para telas médias */
+@media (max-width: 900px) {
+  .chat-window {
+    margin: 8px 0;
+    padding: 10px 4px 8px 4px;
+    min-width: 0;
+    max-width: 100vw;
+    height: 320px;
+    min-height: 320px;
+    max-height: 320px;
+  }
+}
+
 /* Responsivo para telas pequenas */
 @media (max-width: 600px) {
   .chat-window {
+    margin: 8px 0;
+    padding: 10px 2px 8px 2px;
     min-width: 0;
     max-width: 100vw;
-    padding: 10px 4px 8px 4px;
+    height: 220px;
     min-height: 220px;
+    max-height: 220px;
   }
-  .input-area button {
-    padding: 6px 10px;
-    font-size: 0.95em;
-  }
+}
+
+/* === CORREÇÃO DE ALTURA CHAT === */
+
+/* Estes garantem que tudo entre o header e o chat window respeita a altura total */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-view {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0; /* evita overflow vertical */
+}
+
+.chat-main-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 270px;
+  height: 100%;
+  min-height: 0;
+}
+
+.chat-main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.chat-container {
+  display: flex;
+  height: calc(100vh - 120px); /* ocupa o ecrã menos o header e título */
+  min-height: 0;
+}
+.right-panel {
+  display: flex;
+  flex-direction: row; /* lado a lado */
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
