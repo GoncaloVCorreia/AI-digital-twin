@@ -1,25 +1,25 @@
+"""
+Database configuration and session management.
+"""
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-
-# Load environment variables from .env file
+# Replace with your actual database URL
 load_dotenv()
 
-# Get the database URL from the environment
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+psycopg://correia:postgres@db:5432/ai_project_db"
+    "postgresql+psycopg://postgres:postgres@db:5432/ai_project_db"
 )
-
-
-if not DATABASE_URL:
-    raise ValueError("❌ DATABASE_URL not found in environment variables")
 
 # Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=True,  connect_args={"options": "-c client_encoding=UTF8"}
-)
+connect_args = {}
+if DATABASE_URL.startswith('postgresql'):
+    connect_args["options"] = "-c client_encoding=UTF8"
+
+engine = create_engine(DATABASE_URL, echo=True, connect_args=connect_args)
 
 # Create a configured "SessionLocal" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -37,5 +37,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
