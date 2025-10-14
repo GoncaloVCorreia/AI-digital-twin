@@ -56,6 +56,7 @@ async def login(
         "access_token": access_token,
         "token_type": "bearer",
         "username": user.username,
+        "id": user.id,
         "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     }
 
