@@ -32,7 +32,7 @@ from app.database import Base, engine
 class Persona(Base):
     __tablename__ = "personas"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(Integer().with_variant(BigInteger, "postgresql"), primary_key=True, autoincrement=True)
     name = Column(String(512), nullable=False, index=True)
     age = Column(Integer, nullable=False)
     location = Column(String(512), nullable=False)
