@@ -35,7 +35,7 @@ def load_persona(name: str, persona_dir: str = "personas_json") -> PersonaModel:
     path = os.path.join(persona_dir, f"persona_{name}.json")
     if not os.path.exists(path):
         raise FileNotFoundError(f"Persona file not found: {path}")
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     try:
         return PersonaModel(**data)

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 import os
-from configs.groq_config import ConfigGroq
+from src.configs.groq_config import ConfigGroq
 from langchain_groq import ChatGroq
 
 class LLM(ABC):
