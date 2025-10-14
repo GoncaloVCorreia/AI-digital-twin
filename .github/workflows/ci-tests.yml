@@ -39,7 +39,9 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          GROQ_API_KEY: test  
+            
+          GROQ_API_KEY: test 
+          DATABASE_URL: sqlite:///./test.db  
         run: |
           uv run pytest -v --cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=80
 
