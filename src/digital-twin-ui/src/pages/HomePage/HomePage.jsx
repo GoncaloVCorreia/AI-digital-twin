@@ -10,28 +10,31 @@ export default function HomePage() {
   function logout() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("username");
+    localStorage.removeItem("id");
     navigate("/login");
   }
 
   return (
     <div className="home-container">
-      <h1>🤖 Digital Twin Chatbot</h1>
-      <p className="subtitle">Making interviews easier and more autonomous</p>
+      <div className="home-content-box">
+        <h1>🤖 Digital Twin Chatbot</h1>
+        <p className="subtitle">Making interviews easier and more autonomous</p>
 
-      {username && <h2 className="welcome">Bem-vindo, {username} 👋</h2>}
+        {username && <h2 className="welcome">Bem-vindo, {username} 👋</h2>}
 
-      <div className="home-buttons">
-        {/* Só mostra login e register se não estiver autenticado */}
-        {!token && (
-          <>
-            <button onClick={() => navigate("/login")}>Login</button>
-            <button onClick={() => navigate("/register")}>Register</button>
-          </>
-        )}
+        <div className="home-buttons">
+          {/* Só mostra login e register se não estiver autenticado */}
+          {!token && (
+            <>
+              <button onClick={() => navigate("/login")}>Login</button>
+              <button onClick={() => navigate("/register")}>Register</button>
+            </>
+          )}
 
-        {/* Mostra logout apenas se estiver autenticado */}
-        {token && <button onClick={logout}>Logout</button>}
-        {token && <button onClick={() => navigate("/chat")}>Go to Chat</button>}
+          {/* Mostra logout apenas se estiver autenticado */}
+          {token && <button onClick={logout}>Logout</button>}
+          {token && <button onClick={() => navigate("/chat")}>Go to Chat</button>}
+        </div>
       </div>
     </div>
   );

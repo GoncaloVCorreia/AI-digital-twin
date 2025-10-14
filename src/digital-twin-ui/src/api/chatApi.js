@@ -37,3 +37,26 @@ export async function fetchConversationBySessionId(sessionId) {
     return null;
   }
 }
+
+export async function sendMessageToAPI(sessionId, persona, message) {
+  console.log("Sending message to API:", { sessionId, persona, message });
+  const response = await fetch(`${BASE_URL}/respond`, {
+    method: "POST",
+    headers: {
+      ...getAuthHeader(), 
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      persona: persona,
+      session_id: sessionId,
+      messages: [ // <-- fix key name
+        { role: "system", content: "Be concise." }, // <-- non-empty system prompt
+        { role: "user", content: message },
+      ],
+    }),
+  });
+  console.log("API response status:", response.status);
+
+  if (!response.ok) throw new Error("Erro ao enviar mensagem");
+  return await response.json();
+}
