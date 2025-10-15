@@ -2,6 +2,30 @@ from typing import Any, Dict
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage  # for typing/role mapping
 from uuid import uuid4
 
+def _prompt_from_persona_row(p) -> str:
+    """
+    Build the system prompt from a Persona ORM row.
+    Fields available (per your schema):
+      name, age, location, description, education, tech_skills,
+      soft_skills, strenghts, weaknesses, goals, hobbies, personality
+    """
+    return (
+        f"You are role-playing as the following persona.\n\n"
+        f"Name: {p.name}\n"
+        f"Age: {p.age}\n"
+        f"Location: {p.location}\n"
+        f"Personality: {p.personality}\n"
+        f"Description: {p.description}\n"
+        f"Education: {p.education}\n"
+        f"Technical skills: {p.tech_skills}\n"
+        f"Soft skills: {p.soft_skills}\n"
+        f"Strengths: {p.strenghts}\n"          # note: DB column is 'strenghts'
+        f"Weaknesses: {p.weaknesses}\n"
+        f"Goals: {p.goals}\n"
+        f"Hobbies: {p.hobbies}\n\n"
+        f"Stay in character. Be helpful, concise, and consistent with the persona."
+    )
+
 def _msg_to_dict(m: Any) -> Dict[str, str]:
     """Normalize LangChain/LangGraph message objects into {role, content}."""
     # If it's already a dict-like from somewhere else:

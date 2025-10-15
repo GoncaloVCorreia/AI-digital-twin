@@ -31,6 +31,15 @@ class PersonaService:
         except SQLAlchemyError as e:
             db.rollback()
             raise e
+    
+    @staticmethod
+    def get_by_name(db: Session, name: str) -> Optional[PersonaModel]:
+        """Fetch a persona by exact name (case-insensitive)."""
+        return (
+            db.query(PersonaModel)
+              .filter(PersonaModel.name.ilike(name))
+              .first()
+        )
 
     @staticmethod
     def get_persona(db: Session, persona_id: int) -> Optional[PersonaModel]:
