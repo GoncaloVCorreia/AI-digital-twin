@@ -12,7 +12,7 @@ class ChatMessage(BaseModel):
     content: str
 
 class ChatRequest(BaseModel):
-    persona: str
+    persona: Union[int, str] 
     session_id: Optional[str] = None  # optional; server can generate if not provided
     messages: List[ChatMessage]  # parsed by FastAPI (no json.loads)
 

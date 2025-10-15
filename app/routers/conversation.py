@@ -5,19 +5,20 @@ from app.schemas.conversation import ChatRequest, ConversationDBCreate, Conversa
 from app.services.conversation_service import ConversationService
 from app.schemas.interviewers import User
 from app.utils.dependencies import get_current_user
+from app.services.persona_service import PersonaService
 
 from src.chatbot.chat_graph import ChatGraphRunner
 from src.configs.groq_config import ConfigGroq
 from src.llm.llm import GroqLLM
-from src.personas.persona import load_persona
 from typing import Any, Dict, List
 from app.utils.conversation import _msg_to_dict, _new_session_id
 from app.runtime import get_runner
-
+from app.utils.conversation import _prompt_from_persona_row
 import logging
 rlog = logging.getLogger("chat.router")
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
 
 
 # 1) Get ALL conversations (returns: id, interviewer_id, persona, session_id, messages, created_at)
@@ -70,14 +71,24 @@ async def chat_respond(
     rlog.info("chat_respond: session_id=%s", session_id)
 
     # 1) Persona → system prompt
+   # 1) Persona → system prompt (DB, not JSON)
     try:
-        persona = load_persona(data.persona, persona_dir="src/personas_json")
-        system_prompt = persona.build_prompt()
-        rlog.info("chat_respond: persona loaded: %s", data.persona)
+        # Accept either persona name or ID in the request
+        persona_row = None
+        if isinstance(data.persona, int) or (isinstance(data.persona, str) and data.persona.isdigit()):
+            persona_id = int(data.persona)
+            persona_row = PersonaService.get_persona(db, persona_id)
+        else:
+            persona_row = PersonaService.get_by_name(db, str(data.persona))
+
+        if not persona_row:
+            raise ValueError("Persona not found")
+        system_prompt = _prompt_from_persona_row(persona_row)
+        persona_name = persona_row.name  # keep storing name in conversations table
+        rlog.info("chat_respond: persona loaded from DB: %s", persona_name)
     except Exception as e:
         rlog.exception("chat_respond: persona error")
         raise HTTPException(status_code=400, detail=f"Invalid persona: {str(e)}")
-
     # 2) Last user message from request (you’re still sending a list in ChatRequest)
     try:
         user_msg = next(m.content for m in reversed(data.messages) if m.role == "user")
@@ -112,11 +123,12 @@ async def chat_respond(
         db,
         ConversationDBCreate(
             interviewer_id=current_user.id,
-            persona=data.persona,
+            persona=persona_name,   # <-- store canonical name from DB
             session_id=session_id,
-            messages=full_history,  # JSONB column
+            messages=full_history,
         ),
     )
+
     rlog.info("chat_respond: saved conversation id=%s", saved.id)
     return saved
 
