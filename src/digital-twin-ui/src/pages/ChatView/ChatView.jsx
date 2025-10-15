@@ -4,8 +4,9 @@ import PersonaSelector from "../../components/PersonaSelector/PersonaSelector";
 import ChatWindow from "../../components/ChatWindow/ChatWindow";
 import ChatSidebar from "../../components/ChatWindow/ChatSidebar";
 import "./ChatView.css";
-import "../../styles.css";
+// import "../../styles.css";
 import { fetchConversations, fetchConversationBySessionId, sendMessageToAPI } from "../../api/chatApi";
+import PersonaCreateForm from "../../components/PersonaSelector/PersonaCreateForm";
 
 export default function ChatView() {
   const navigate = useNavigate();
@@ -24,6 +25,10 @@ export default function ChatView() {
   const [currentChatId, setCurrentChatId] = useState(null);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
+  const [showPersonaCreate, setShowPersonaCreate] = useState(false);
+  const [showPersonaCreatedPopup, setShowPersonaCreatedPopup] = useState(false);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
+  
 
   // Fetch de todas as conversas reais do utilizador
   useEffect(() => {
@@ -89,11 +94,12 @@ export default function ChatView() {
 
   function onSelectConversation(id) {
     setCurrentChatId(id);
+    setShowPersonaPicker(false);
+    setShowPersonaCreate(false); // fecha o form de criação se estiver aberto
     const conv = conversations.find((c) => c.id === id);
     if (conv && conv.persona) {
       setSelectedPersona(conv.persona);
     }
-    // Remover else que coloca null
   }
 
   // Add handler to refresh conversations after sending a message
@@ -122,6 +128,8 @@ export default function ChatView() {
 
   // Corrigir lógica para garantir que seleciona a conversa nova correta
   async function handleNewChat(persona) {
+    setIsCreatingChat(true);
+    setCurrentConversation(null); // Clear current conversation immediately
     try {
       const interviewerId = localStorage.getItem("id");
       await sendMessageToAPI(null, persona, "Olá!");
@@ -157,11 +165,14 @@ export default function ChatView() {
       }
     } catch (err) {
       alert("Erro ao criar novo chat.");
+    } finally {
+      setIsCreatingChat(false);
     }
   }
 
   async function handleNewChatButton() {
     setShowPersonaPicker(true);
+    setShowPersonaCreate(false); // fecha o form de criação se estiver aberto
   }
 
   async function handlePersonaPick(persona) {
@@ -169,11 +180,32 @@ export default function ChatView() {
     await handleNewChat(persona);
   }
 
+  function handleShowPersonaCreate() {
+    setShowPersonaPicker(false);
+    setShowPersonaCreate(true);
+  }
+
+  function handlePersonaCreated() {
+    setShowPersonaCreate(false);
+    setShowPersonaPicker(true);
+    setShowPersonaCreatedPopup(true);
+    setTimeout(() => setShowPersonaCreatedPopup(false), 2000);
+  }
+
+  function handleCancelPersonaCreate() {
+    setShowPersonaCreate(false);
+    setShowPersonaPicker(true);
+  }
+
   return (
     <div className="chat-view">
       <header className="chat-header">
         <div className="user-info">
           <span className="username">👤 {username}</span>
+        </div>
+        {/* Usa classe para o texto centralizado */}
+        <div className="chat-header-title">
+          Digital Twin Chatbot 🤖
         </div>
         <div className="header-buttons">
           <button className="home-btn" onClick={() => navigate("/")}>
@@ -184,71 +216,61 @@ export default function ChatView() {
           </button>
         </div>
       </header>
-
+      {showPersonaCreatedPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: "80px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "#3a8bfd",
+            color: "#fff",
+            padding: "16px 32px",
+            borderRadius: "12px",
+            fontWeight: 600,
+            fontSize: "1.15rem",
+            zIndex: 9999,
+            boxShadow: "0 2px 12px rgba(58,139,253,0.18)",
+            transition: "opacity 0.3s"
+          }}
+        >
+          Persona criada com sucesso!
+        </div>
+      )}
       <div className="chat-main-grid">
         <div className="chat-main-content">
-          <h1 className="chat-title">Digital Twin Chatbot 🤖</h1>
-
           <div className="chat-container">
-            {showPersonaPicker ? (
-              <div
-                className="right-panel persona-picker-panel"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                  minHeight: "350px"
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "30px",
-                    marginTop: "10px",
-                    marginBottom: "30px"
-                  }}
-                >
-                  {["rafael", "garcia", "correia", "francisco"].map((p) => (
-                    <div
-                      key={p}
-                      className="persona-circle"
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        fontSize: "1.2rem",
-                        background: "#f1f1f1",
-                        border: "2px solid #ccc",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: "bold",
-                        transition: "all 0.3s"
-                      }}
-                      onClick={() => handlePersonaPick(p)}
-                    >
-                      <span className="persona-name">{p}</span>
-                    </div>
-                  ))}
+            {showPersonaCreate ? (
+              <div className="right-panel persona-create-panel">
+                <PersonaCreateForm
+                  onCreated={handlePersonaCreated}
+                  onCancel={handleCancelPersonaCreate}
+                />
+              </div>
+            ) : showPersonaPicker ? (
+              <div className="right-panel persona-picker-panel">
+                <div className="persona-picker-row" style={{ flexDirection: "column", gap: "0" }}>
+                  <PersonaSelector
+                    horizontal
+                    selected={null}
+                    setSelected={handlePersonaPick}
+                    showAddButton={true}
+                    onAddClick={handleShowPersonaCreate}
+                  />
+                  <button
+                    className="new-chat-btn persona-cancel-btn"
+                    style={{ marginTop: "32px" }}
+                    onClick={() => setShowPersonaPicker(false)}
+                  >
+                    Cancelar
+                  </button>
                 </div>
-                <button
-                  className="new-chat-btn"
-                  style={{
-                    width: "auto",
-                    padding: "8px 24px",
-                    display: "block",
-                    marginLeft: "auto",
-                    marginRight: "auto"
-                  }}
-                  onClick={() => setShowPersonaPicker(false)}
-                >
-                  Cancelar
-                </button>
+              </div>
+            ) : isCreatingChat ? (
+              <div className="right-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center', color: '#3a8bfd', fontSize: '1.2rem', fontWeight: 600 }}>
+                  A criar novo chat...
+                </div>
               </div>
             ) : (
               <div className="right-panel">
@@ -256,7 +278,7 @@ export default function ChatView() {
                   <PersonaSelector
                     selected={selectedPersona}
                     setSelected={setSelectedPersona}
-                    persona={selectedPersona} // <-- Adiciona esta prop
+                    persona={selectedPersona}
                   />
                 </aside>
 

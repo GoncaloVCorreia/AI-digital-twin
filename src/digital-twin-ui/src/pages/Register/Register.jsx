@@ -39,7 +39,7 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        // data.detail é um array de erros
+        // data.detail é um array de erros ou uma string
         const errors = {};
         if (Array.isArray(data.detail)) {
           data.detail.forEach((err) => {
@@ -47,7 +47,8 @@ export default function Register() {
             errors[field] = err.msg;
           });
         } else {
-          errors.general = data.detail || "Erro ao registar utilizador";
+          // Se for string, mostrar como mensagem geral
+          setMessage(data.detail || "Erro ao registar utilizador");
         }
         setFieldErrors(errors);
         throw new Error("Erro de validação");

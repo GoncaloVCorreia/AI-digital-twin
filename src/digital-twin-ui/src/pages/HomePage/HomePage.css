@@ -9,36 +9,6 @@
   padding: 0;
 }
 
-.home-banner {
-  width: 100%;
-  max-width: 700px;
-  min-height: 180px;
-  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
-  border-radius: 24px;
-  margin-bottom: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 32px rgba(58,139,253,0.10), 0 2px 16px rgba(0,0,0,0.07);
-  position: relative;
-  overflow: hidden;
-}
-
-.home-banner img {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  margin-right: 32px;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
-}
-
-.home-banner .banner-title {
-  color: #fff;
-  font-size: 2.2rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
 
 .home-content-box {
   margin-top: 0;

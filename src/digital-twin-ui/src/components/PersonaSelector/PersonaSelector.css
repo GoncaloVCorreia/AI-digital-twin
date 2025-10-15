@@ -1,25 +1,16 @@
-.persona-selector {
+/* Personas no painel lateral esquerdo do chat */
+.persona-panel .persona-selector {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 18px;
   height: 300px;
-  align-items: center; /* Add this line */
-  justify-content: center; /* Add this line */
-  width: 100%; /* Add this line */
-}
-
-.persona-selector.horizontal {
-  flex-direction: row;
-  justify-content: center;
   align-items: center;
-  gap: 30px;
-  height: auto;
-  margin: 0;
-  padding: 0;
+  justify-content: center;
+  width: 100%;
 }
 
-.persona-circle {
+.persona-panel .persona-circle {
   width: 100%;
   min-width: 80px;
   min-height: 120px;
@@ -28,35 +19,305 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Remove border-radius */
   font-weight: bold;
   font-size: 1.1rem;
-  box-shadow: none;
-  border: none;
+  box-shadow: none; /* sem sombra */
+  border: none;     /* sem borda */
   transition: all 0.3s;
   padding: 0;
 }
 
-.persona-circle.active {
+.persona-panel .persona-circle.active {
   background: none;
   color: #222;
-  border: none;
-  box-shadow: none;
+  border: none;     /* sem borda */
+  box-shadow: none; /* sem sombra */
 }
 
 /* Avatar ocupa toda a largura do container, altura automática */
-.persona-avatar {
+.persona-panel .persona-avatar {
   width: 100%;
   height: auto;
   border-radius: 0;
   object-fit: contain;
-  box-shadow: 0 2px 8px rgba(58,139,253,0.10);
+  box-shadow: none; /* sem sombra */
   background: none;
+  border: none;     /* sem borda */
 }
 
-.persona-name {
+.persona-panel .persona-name {
   font-size: 1rem;
   text-align: center;
   font-weight: 600;
   letter-spacing: 0.5px;
+}
+
+/* Personas na escolha de novo chat */
+.persona-picker-panel .persona-selector {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 72px;
+  flex-wrap: wrap; /* ← Add this line */
+  max-width: 90%; /* Optional: prevent personas from touching edges */
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Wrapper para alinhar personas e botão "+" na vertical, centralizados */
+.persona-picker-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 350px;
+  position: relative;
+}
+
+/* Centraliza verticalmente a persona-picker-row dentro do painel */
+.persona-picker-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  gap: 0;
+}
+
+
+.persona-cancel-btn {
+  display: block;
+  width: 220px; /* aumenta largura horizontal */
+  min-width: 180px;
+  max-width: 320px;
+  margin: 0;
+  font-size: 1.1rem;
+  padding: 12px 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.persona-picker-panel .persona-circle {
+  display: flex;
+  flex-direction: column; /* avatar em cima, nome em baixo */
+  align-items: center;
+  justify-content: flex-end;
+  width: 120px;
+  height: 140px; /* altura maior para nome em baixo */
+  min-width: 120px;
+  min-height: 140px;
+  max-width: 140px;
+  max-height: 160px;
+  background: #f1f1f1;
+  border-radius: 18px;
+  border: none; /* sem borda */
+  box-shadow: none; /* sem sombra */
+  font-weight: bold;
+  font-size: 1.5rem; /* aumenta fonte */
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  padding: 0;
+  position: relative;
+}
+
+.persona-picker-panel .persona-circle:hover,
+.persona-picker-panel .persona-circle.selected,
+.persona-picker-panel .persona-circle.active {
+  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
+  color: #fff;
+  box-shadow: none; /* sem sombra */
+  border: none;     /* sem borda */
+}
+
+/* Avatar sem sombra nem borda */
+.persona-picker-panel .persona-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: none; /* sem sombra */
+  background: none;
+  border: none;     /* sem borda */
+  transition: box-shadow 0.3s, border-radius 0.3s;
+  margin-bottom: 8px; /* espaço entre avatar e nome */
+}
+
+.persona-picker-panel .persona-name {
+  font-size: 1.15rem; /* aumenta fonte do nome */
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #222;
+  margin-top: 0;
+  margin-bottom: 8px;
+  transition: color 0.2s;
+}
+
+.persona-picker-panel .persona-circle:hover .persona-name,
+.persona-picker-panel .persona-circle.selected .persona-name,
+.persona-picker-panel .persona-circle.active .persona-name {
+  color: #fff;
+}
+
+/* Botão de adicionar persona - agora com o mesmo estilo das personas */
+.persona-selector.horizontal .persona-add-circle,
+.persona-picker-panel .persona-selector .persona-add-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 120px;
+  height: 140px;
+  min-width: 120px;
+  min-height: 140px;
+  max-width: 140px;
+  max-height: 160px;
+  background: #f1f1f1;
+  border-radius: 18px;
+  border: none;
+  box-shadow: none;
+  font-weight: bold;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  padding: 0;
+  position: relative;
+}
+
+.persona-selector.horizontal .persona-add-circle:hover,
+.persona-picker-panel .persona-selector .persona-add-circle:hover {
+  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
+  color: #fff;
+}
+
+.persona-selector.horizontal .persona-add-circle .persona-avatar,
+.persona-picker-panel .persona-selector .persona-add-circle .persona-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: none;
+  background: none;
+  border: none;
+  margin-bottom: 8px;
+}
+
+.persona-selector.horizontal .persona-add-circle .persona-name,
+.persona-picker-panel .persona-selector .persona-add-circle .persona-name {
+  font-size: 1.15rem;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #222;
+  margin-top: 0;
+  margin-bottom: 8px;
+  transition: color 0.2s;
+}
+
+.persona-selector.horizontal .persona-add-circle:hover .persona-name,
+.persona-picker-panel .persona-selector .persona-add-circle:hover .persona-name {
+  color: #fff;
+}
+
+/* Remove old button styles */
+.persona-selector.horizontal .persona-add-btn,
+.persona-picker-panel .persona-selector .persona-add-btn {
+  display: none;
+}
+
+/* Formulário de criação de persona */
+.persona-create-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 350px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.persona-create-form {
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.persona-create-form h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.persona-create-form label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.persona-create-form input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  margin-bottom: 0;
+}
+
+.persona-create-form button[type="submit"] {
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #3a8bfd;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.persona-create-form button[type="submit"]:hover {
+  background: #0056b3;
+}
+
+.persona-create-form button[type="button"] {
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #ddd;
+  color: #222;
+  border: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.persona-create-form button[type="button"]:hover {
+  background: #bbb;
+}
+
+.persona-create-form-fields {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  width: 100%;
+}
+
+.persona-create-form-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
