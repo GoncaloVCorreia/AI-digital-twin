@@ -9,7 +9,7 @@ const personas = [
   { name: "francisco", avatar: "/avatars/francisco.png" },
 ];
 
-export default function PersonaSelector({ selected, setSelected, horizontal, persona }) {
+export default function PersonaSelector({ selected, setSelected, horizontal, persona, showAddButton, onAddClick }) {
   // Usa persona como fallback se selected estiver null/undefined
   const personaName = selected || persona;
   const personaToShow = personas.find((p) => p.name === personaName);
@@ -17,28 +17,42 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
   return (
     <div className={`persona-selector${horizontal ? " horizontal" : ""}`}>
       {horizontal
-        ? personas.map((p) => {
-            const isActive = personaName === p.name;
-            return (
+        ? (
+          <>
+            {personas.map((p) => {
+              const isActive = personaName === p.name;
+              return (
+                <div
+                  key={p.name}
+                  id={`persona-${p.name}`}
+                  className={`persona-circle${isActive ? " active" : ""}`}
+                  onClick={() => setSelected(p.name)}
+                >
+                  <img
+                    src={p.avatar}
+                    alt={p.name}
+                    className="persona-avatar"
+                  />
+                  <span className="persona-name">{p.name}</span>
+                </div>
+              );
+            })}
+            {showAddButton && (
               <div
-                key={p.name}
-                id={`persona-${p.name}`}
-                className={`persona-circle${isActive ? " active" : ""}`}
-                onClick={() => setSelected(p.name)}
+                className="persona-circle persona-add-circle"
+                onClick={onAddClick}
+                title="Adicionar nova persona"
               >
                 <img
-                  src={p.avatar}
-                  alt={p.name}
+                  src="/avatars/plus.png"
+                  alt="add"
                   className="persona-avatar"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    objectFit: "contain",
-                  }}
                 />
+                <span className="persona-name">Adicionar</span>
               </div>
-            );
-          })
+            )}
+          </>
+        )
         : personaToShow ? (
             <div
               key={personaToShow.name}

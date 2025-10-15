@@ -1,6 +1,7 @@
 // src/components/ChatWindow/ChatSidebar.jsx
 import React from "react";
 import "./ChatSidebar.css";
+import { deleteConversationBySessionId, fetchConversations } from "../../api/chatApi";
 
 export default function ChatSidebar({
   conversations,
@@ -8,6 +9,27 @@ export default function ChatSidebar({
   onSelectConversation,
   onNewChat,
 }) {
+  // Adiciona função para apagar conversa e atualizar lista
+  async function handleDeleteConversation(conv) {
+    if (!window.confirm("Apagar esta conversa?")) return;
+    try {
+      await deleteConversationBySessionId(conv.session_id);
+      // Atualiza conversas após apagar
+      const interviewerId = localStorage.getItem("id");
+      const updatedList = await fetchConversations(interviewerId);
+      // Se a conversa apagada era a selecionada, limpa seleção
+      if (conv.id === currentChatId && updatedList.length > 0) {
+        onSelectConversation(updatedList[0].id);
+      }
+      // Se não houver conversas, limpa seleção
+      if (updatedList.length === 0) {
+        onSelectConversation(null);
+      }
+    } catch (err) {
+      alert("Erro ao apagar conversa.");
+    }
+  }
+
   return (
     <aside className="chat-sidebar">
       <div className="sidebar-header sidebar-header--sticky">
@@ -53,13 +75,41 @@ export default function ChatSidebar({
                 lastMsg = words.slice(0, 5).join(" ");
                 if (words.length > 5) lastMsg += " ...";
               }
+              const isSelected = String(conv.id) === String(currentChatId);
               return (
                 <li
                   key={conv.id}
-                  className={conv.id === currentChatId ? "selected" : ""}
+                  className={`chat-item${
+                    isSelected ? " selected" : ""
+                  }`}
                   onClick={() => onSelectConversation(conv.id)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
                 >
-                  {lastMsg}
+                  <span style={{ flex: 1, cursor: "pointer" }}>
+                    {lastMsg}
+                  </span>
+                  <button
+                    className="delete-chat-btn"
+                    title="Apagar conversa"
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleDeleteConversation(conv);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "0 6px",
+                      marginLeft: "8px",
+                      display: "flex",
+                      alignItems: "center"
+                    }}
+                  >
+                    {/* Trash SVG icon */}
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                      <path d="M7 9v5m3-5v5m-7 2a2 2 0 002 2h8a2 2 0 002-2V7H3v9zm5-16a2 2 0 012 2v1H7V3a2 2 0 012-2zm7 4H4" stroke="#000000ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </li>
               );
             })}

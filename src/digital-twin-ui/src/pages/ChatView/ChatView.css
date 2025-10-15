@@ -12,6 +12,19 @@
   margin-bottom: 0;
 }
 
+.chat-header-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  z-index: 2;
+  pointer-events: none;
+  text-align: center;
+}
+
 .username {
   font-size: 1.2rem;
   font-weight: 600; /* azul escuro suave */
@@ -144,19 +157,6 @@
   right: auto !important;
 }
 
-.chat-title {
-  /* get the title a little lower */
-  margin: 0; 
-  padding: 0;
-  margin-bottom: 0px;
-  margin-top: 20px;
-  font-size: 2rem;
-  text-align: center;
-  font-weight: 700;
-  background: none;
-  box-shadow: none;
-}
-
 /* Layout principal: ocupa toda a altura da viewport */
 .chat-view {
   height: 100vh;
@@ -224,4 +224,80 @@
 .chat-area {
   flex: 1;
   min-height: 0; /* evita que os filhos cresçam com o conteúdo */
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.home-btn,
+.logout-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
+  color: #f8f8f8; /* tom claro, não preto */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.home-btn:hover {
+  background: linear-gradient(90deg, #0056b3 60%, #003d82 100%);
+}
+
+.logout-btn:hover {
+  background: linear-gradient(90deg, #e74c3c 60%, #c0392b 100%);
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-view {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0; /* evita overflow vertical */
+}
+
+.chat-main-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 270px;
+  height: 100%;
+  min-height: 0;
+}
+
+.chat-main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.chat-container {
+  display: flex;
+  height: calc(100vh - 120px); /* ocupa o ecrã menos o header e título */
+  min-height: 0;
+}
+.right-panel {
+  display: flex;
+  flex-direction: row; /* lado a lado */
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
 }

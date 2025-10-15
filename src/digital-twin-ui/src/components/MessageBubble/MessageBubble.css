@@ -1,27 +1,38 @@
 .message-bubble {
   max-width: 70%;
-  padding: 8px 12px;
-  margin: 4px 0;
-  border-radius: 12px;
-  word-wrap: break-word;
+  padding: 12px 18px;
+  margin: 8px 0;
+  border-radius: 18px;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  word-break: break-word;
+  animation: fadeInBubble 0.4s;
+  transition: background 0.2s, color 0.2s;
 }
 
-/* Mensagens do user à direita */
+@keyframes fadeInBubble {
+  from { opacity: 0; transform: translateY(10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
 .message-bubble.user {
-  background-color: #3a3a3a;
+  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
   color: #fff;
   align-self: flex-end;
+  border-bottom-right-radius: 6px;
+  border-top-right-radius: 18px;
+  border-top-left-radius: 18px;
+  border-bottom-left-radius: 18px;
 }
 
-/* Mensagens do assistant / system à esquerda */
 .message-bubble.assistant {
-  background-color: #e5e5ea;
-  color: #000;
+  background: #f1f1f1;
+  color: #222;
   align-self: flex-start;
+  border-bottom-left-radius: 6px;
+  border-top-right-radius: 18px;
+  border-top-left-radius: 18px;
+  border-bottom-right-radius: 18px;
 }
 
-/* Adicione display flex à lista de mensagens para suportar align-self nos balões */
-.messages {
-  display: flex;
-  flex-direction: column;
-}
+

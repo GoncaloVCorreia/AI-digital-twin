@@ -130,54 +130,7 @@
 /* === CORREÇÃO DE ALTURA CHAT === */
 
 /* Estes garantem que tudo entre o header e o chat window respeita a altura total */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
 
-.chat-view {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  min-height: 0; /* evita overflow vertical */
-}
-
-.chat-main-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 270px;
-  height: 100%;
-  min-height: 0;
-}
-
-.chat-main-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
-.chat-container {
-  display: flex;
-  height: calc(100vh - 120px); /* ocupa o ecrã menos o header e título */
-  min-height: 0;
-}
-.right-panel {
-  display: flex;
-  flex-direction: row; /* lado a lado */
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-}
-
-.chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-}
 
 
 .chat-window {
@@ -204,82 +157,9 @@ html, body, #root {
   white-space: pre-wrap;
 }
 
-.message-bubble {
-  max-width: 70%;
-  padding: 12px 18px;
-  margin: 8px 0;
-  border-radius: 18px;
-  font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  word-break: break-word;
-  animation: fadeInBubble 0.4s;
-  transition: background 0.2s, color 0.2s;
-}
-
-@keyframes fadeInBubble {
-  from { opacity: 0; transform: translateY(10px);}
-  to { opacity: 1; transform: translateY(0);}
-}
-
-.message-bubble.user {
-  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
-  color: #fff;
-  align-self: flex-end;
-  border-bottom-right-radius: 6px;
-  border-top-right-radius: 18px;
-  border-top-left-radius: 18px;
-  border-bottom-left-radius: 18px;
-}
-
-.message-bubble.assistant {
-  background: #f1f1f1;
-  color: #222;
-  align-self: flex-start;
-  border-bottom-left-radius: 6px;
-  border-top-right-radius: 18px;
-  border-top-left-radius: 18px;
-  border-bottom-right-radius: 18px;
-}
-
-.message-bubble .bubble-meta {
-  font-size: 0.8em;
-  color: #888;
-  margin-top: 4px;
-  text-align: right;
-}
 
 
 
-.user-info {
-  display: flex;
-  align-items: center;
-}
-
-
-
-.header-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.home-btn,
-.logout-btn {
-  padding: 8px 18px;
-  border-radius: 8px;
-  border: none;
-  background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%);
-  color: #f8f8f8; /* tom claro, não preto */
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 1rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
-
-.home-btn:hover,
-.logout-btn:hover {
-  background: #0056b3;
-}
 
 /* Estilo para o título da persona no topo da janela do chat */
 .chat-persona-title {
