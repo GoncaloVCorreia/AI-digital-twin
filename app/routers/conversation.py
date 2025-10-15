@@ -20,7 +20,6 @@ rlog = logging.getLogger("chat.router")
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
-
 # 1) Get ALL conversations (returns: id, interviewer_id, persona, session_id, messages, created_at)
 @router.get("/conversations", response_model=List[ConversationResponse])
 async def list_conversations(
@@ -69,7 +68,6 @@ async def chat_respond(
     # NEW: ensure we have a session_id
     session_id = data.session_id or _new_session_id()
     rlog.info("chat_respond: session_id=%s", session_id)
-
 
     # 1) Persona → system prompt
     try:
@@ -121,3 +119,15 @@ async def chat_respond(
     )
     rlog.info("chat_respond: saved conversation id=%s", saved.id)
     return saved
+
+
+@router.delete("/conversations/delete/{session_id}")
+async def delete_conversation_by_session(
+    session_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    deleted = ConversationService.delete_by_session(db, session_id=session_id)
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="No conversation found for this session_id")
+    return {"session_id": session_id, "deleted": deleted}

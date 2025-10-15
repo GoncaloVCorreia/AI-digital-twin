@@ -13,8 +13,6 @@ from app.runtime import init_runner
 
 log = logging.getLogger("chat.startup")
 
-
-
 # Set up logging
 logger = logging.getLogger("uvicorn.error")
 
@@ -39,7 +37,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 @app.on_event("startup")
 def startup_init_runner():
     init_runner()
-    
+
 # Include routers
 app.include_router(auth_router)
 app.include_router(personas_router)

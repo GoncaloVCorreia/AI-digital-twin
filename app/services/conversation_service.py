@@ -57,3 +57,13 @@ class ConversationService:
             .order_by(desc(Conversation.created_at), desc(Conversation.id))
             .all()
         )
+    @staticmethod
+    def delete_by_session(db: Session, session_id: str) -> int:
+        """
+        Delete all Conversation rows for a given session_id.
+        Returns the number of rows deleted.
+        """
+        q = db.query(Conversation).filter(Conversation.session_id == session_id)
+        deleted = q.delete(synchronize_session=False)
+        db.commit()
+        return deleted
