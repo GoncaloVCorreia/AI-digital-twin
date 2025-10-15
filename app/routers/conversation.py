@@ -12,23 +12,14 @@ from src.llm.llm import GroqLLM
 from src.personas.persona import load_persona
 from typing import Any, Dict, List
 from app.utils.conversation import _msg_to_dict, _new_session_id
+from app.runtime import get_runner
 
 import logging
 rlog = logging.getLogger("chat.router")
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
-# --- Lazy init so importing this module doesn't hit Postgres in CI/tests ---
-_runner = None
-_llm = None
-def _get_runner():
-    global _runner, _llm
-    if _runner is None:
-        logging.getLogger("chat.router").info("_get_runner: creating GroqLLM + ChatGraphRunner")
-        _llm = GroqLLM(ConfigGroq())
-        _runner = ChatGraphRunner(_llm)
-        logging.getLogger("chat.router").info("_get_runner: ready")
-    return _runner
+
 
 # 1) Get ALL conversations (returns: id, interviewer_id, persona, session_id, messages, created_at)
 @router.get("/conversations", response_model=List[ConversationResponse])
@@ -73,7 +64,7 @@ async def chat_respond(
     current_user: User = Depends(get_current_user),
 ):
     rlog.info("chat_respond: ENTER")
-    runner = _get_runner()
+    runner = get_runner()
     rlog.info("chat_respond: got runner")
     # NEW: ensure we have a session_id
     session_id = data.session_id or _new_session_id()
