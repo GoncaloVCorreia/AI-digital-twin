@@ -13,7 +13,8 @@ from src.personas.persona import load_persona
 from typing import Any, Dict, List
 from app.utils.conversation import _msg_to_dict, _new_session_id
 
-
+import logging
+rlog = logging.getLogger("chat.router")
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -23,8 +24,10 @@ _llm = None
 def _get_runner():
     global _runner, _llm
     if _runner is None:
+        logging.getLogger("chat.router").info("_get_runner: creating GroqLLM + ChatGraphRunner")
         _llm = GroqLLM(ConfigGroq())
         _runner = ChatGraphRunner(_llm)
+        logging.getLogger("chat.router").info("_get_runner: ready")
     return _runner
 
 # 1) Get ALL conversations (returns: id, interviewer_id, persona, session_id, messages, created_at)
@@ -69,34 +72,42 @@ async def chat_respond(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    rlog.info("chat_respond: ENTER")
     runner = _get_runner()
+    rlog.info("chat_respond: got runner")
     # NEW: ensure we have a session_id
     session_id = data.session_id or _new_session_id()
+    rlog.info("chat_respond: session_id=%s", session_id)
+
 
     # 1) Persona → system prompt
     try:
         persona = load_persona(data.persona, persona_dir="src/personas_json")
         system_prompt = persona.build_prompt()
+        rlog.info("chat_respond: persona loaded: %s", data.persona)
     except Exception as e:
+        rlog.exception("chat_respond: persona error")
         raise HTTPException(status_code=400, detail=f"Invalid persona: {str(e)}")
 
     # 2) Last user message from request (you’re still sending a list in ChatRequest)
     try:
         user_msg = next(m.content for m in reversed(data.messages) if m.role == "user")
+        rlog.info("chat_respond: got user_msg (%d chars)", len(user_msg))
     except StopIteration:
         raise HTTPException(status_code=400, detail="Missing user message")
 
     # 3) Invoke graph (this will persist the new checkpoint in Postgres)
+    rlog.info("chat_respond: invoking stream_response()")
     ai_response = runner.stream_response(
         user_input=user_msg,
         system_message=system_prompt,
         session_id=session_id,
     )
-
+    rlog.info("chat_respond: got ai_response (%s)", "yes" if ai_response else "no")
     # 4) Pull full thread state from LangGraph and normalize to [{role, content}, ...]
-    snapshot = runner.graph.get_state({"configurable": {"thread_id": data.session_id}})
+    snapshot = runner.graph.get_state({"configurable": {"thread_id": session_id}})
     state_msgs = snapshot.values.get("messages", []) if snapshot and snapshot.values else []
-
+    rlog.info("chat_respond: state_msgs count=%d", len(state_msgs))
     # If, for any reason, state was empty, fall back to current turn only
     if not state_msgs:
         state_msgs = [
@@ -117,4 +128,5 @@ async def chat_respond(
             messages=full_history,  # JSONB column
         ),
     )
+    rlog.info("chat_respond: saved conversation id=%s", saved.id)
     return saved

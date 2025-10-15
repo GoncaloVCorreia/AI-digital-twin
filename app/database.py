@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 import os
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+psycopg://correia:postgres@db:5432/ai_project_db"
+    "postgresql+psycopg://correia:postgres@localhost:5432/ai_project_db"
 )
 
 # Create the SQLAlchemy engine

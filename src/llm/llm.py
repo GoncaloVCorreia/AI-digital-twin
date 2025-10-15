@@ -19,6 +19,8 @@ class GroqLLM(LLM):
         super().__init__(config.model_name, config.temperature)
         load_dotenv()
         groq_api_key = os.environ.get("GROQ_API_KEY")
+        if not groq_api_key:
+            raise RuntimeError("GROQ_API_KEY is missing/empty in environment.")
         
         self.llm = ChatGroq(
             groq_api_key=groq_api_key,
