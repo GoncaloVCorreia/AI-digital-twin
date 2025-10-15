@@ -3,8 +3,9 @@ FROM python:3.12-slim
 
 # System deps (libpq for psycopg, gcc can be useful if wheels not available)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 gcc curl \
- && rm -rf /var/lib/apt/lists/*
+    libpq5 gcc curl ca-certificates \
+  && update-ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # Workdir
 WORKDIR /app

@@ -11,7 +11,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+psycopg://postgres:postgres@db:5432/ai_project_db"
+    "postgresql+psycopg://correia:postgres@localhost:5432/ai_project_db"
 )
 
 # Create the SQLAlchemy engine
