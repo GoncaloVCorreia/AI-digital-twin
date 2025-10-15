@@ -9,6 +9,10 @@ from app.routers.conversation import router as conversation_router
 from app.middleware.logging import RequestLoggingMiddleware, SecurityHeadersMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings  # or wherever your Settings class is
+from app.runtime import init_runner
+
+log = logging.getLogger("chat.startup")
+
 
 
 # Set up logging
@@ -32,6 +36,10 @@ app.add_middleware(
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
+@app.on_event("startup")
+def startup_init_runner():
+    init_runner()
+    
 # Include routers
 app.include_router(auth_router)
 app.include_router(personas_router)

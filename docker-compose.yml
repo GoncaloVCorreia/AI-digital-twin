@@ -23,7 +23,7 @@ services:
   app:
     build: .
     container_name: ai_project_app
-    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --log-level debug
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug
     environment:
       DATABASE_URL: postgresql+psycopg://correia:postgres@db:5432/ai_project_db
       CHECKPOINT_URL: postgresql://correia:postgres@db:5432/ai_project_db?options=-c%20client_encoding%3DUTF8
