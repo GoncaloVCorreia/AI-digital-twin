@@ -39,20 +39,37 @@ export default function ChatView() {
       try {
         const data = await fetchConversations(interviewerId);
         if (mounted) {
-          setConversations(data);
-          // Seleciona automaticamente a conversa mais recente
-          if (data.length > 0) {
+          // Handle case where API returns null, undefined, or empty array
+          const convList = data || [];
+          setConversations(convList);
+          
+          if (convList.length > 0) {
             // Ordena por data (descendente)
-            const sorted = [...data].sort((a, b) => {
+            const sorted = [...convList].sort((a, b) => {
               const ta = new Date(a.created_at || a.updated_at || 0).getTime();
               const tb = new Date(b.created_at || b.updated_at || 0).getTime();
               return tb - ta;
             });
             setCurrentChatId(sorted[0].id);
+            setShowPersonaPicker(false);
+          } else {
+            // No conversations, show persona picker
+            setShowPersonaPicker(true);
+            setCurrentChatId(null);
+            setCurrentConversation(null);
+            setSelectedPersona(null);
           }
         }
       } catch (err) {
         console.error("Erro ao buscar conversas:", err);
+        // On error, also show persona picker
+        if (mounted) {
+          setConversations([]);
+          setShowPersonaPicker(true);
+          setCurrentChatId(null);
+          setCurrentConversation(null);
+          setSelectedPersona(null);
+        }
       }
     }
 
@@ -95,10 +112,14 @@ export default function ChatView() {
   function onSelectConversation(id) {
     setCurrentChatId(id);
     setShowPersonaPicker(false);
-    setShowPersonaCreate(false); // fecha o form de criação se estiver aberto
+    setShowPersonaCreate(false);
     const conv = conversations.find((c) => c.id === id);
     if (conv && conv.persona) {
       setSelectedPersona(conv.persona);
+    } else if (!id) {
+      // If id is null (all conversations deleted), clear everything
+      setSelectedPersona(null);
+      setCurrentConversation(null);
     }
   }
 
@@ -197,6 +218,26 @@ export default function ChatView() {
     setShowPersonaPicker(true);
   }
 
+  function handleConversationsUpdate(updatedList) {
+    console.log("=== handleConversationsUpdate called ===");
+    console.log("Current conversations:", conversations);
+    console.log("Updated list:", updatedList);
+    console.log("Updated list length:", updatedList.length);
+    
+    setConversations(updatedList);
+    
+    // If no conversations left, show persona picker
+    if (updatedList.length === 0) {
+      console.log("No conversations left, showing persona picker");
+      setShowPersonaPicker(true);
+      setCurrentChatId(null);
+      setCurrentConversation(null);
+      setSelectedPersona(null);
+    }
+    
+    console.log("=== handleConversationsUpdate complete ===");
+  }
+
   return (
     <div className="chat-view">
       <header className="chat-header">
@@ -247,7 +288,7 @@ export default function ChatView() {
                   onCancel={handleCancelPersonaCreate}
                 />
               </div>
-            ) : showPersonaPicker ? (
+            ) : showPersonaPicker || conversations.length === 0 ? (
               <div className="right-panel persona-picker-panel">
                 <div className="persona-picker-row" style={{ flexDirection: "column", gap: "0" }}>
                   <PersonaSelector
@@ -257,13 +298,15 @@ export default function ChatView() {
                     showAddButton={true}
                     onAddClick={handleShowPersonaCreate}
                   />
-                  <button
-                    className="new-chat-btn persona-cancel-btn"
-                    style={{ marginTop: "32px" }}
-                    onClick={() => setShowPersonaPicker(false)}
-                  >
-                    Cancelar
-                  </button>
+                  {conversations.length > 0 && (
+                    <button
+                      className="new-chat-btn persona-cancel-btn"
+                      style={{ marginTop: "32px" }}
+                      onClick={() => setShowPersonaPicker(false)}
+                    >
+                      Cancelar
+                    </button>
+                  )}
                 </div>
               </div>
             ) : isCreatingChat ? (
@@ -300,6 +343,7 @@ export default function ChatView() {
           currentChatId={currentChatId}
           onSelectConversation={onSelectConversation}
           onNewChat={handleNewChatButton}
+          onConversationsUpdate={handleConversationsUpdate}
         />
       </div>
     </div>

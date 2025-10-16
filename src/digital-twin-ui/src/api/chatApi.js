@@ -40,7 +40,7 @@ export async function fetchConversationBySessionId(sessionId) {
 
 export async function deleteConversationBySessionId(sessionId) {
   const response = await fetch(
-    `${BASE_URL}/conversations/by-session/${sessionId}`,
+    `${BASE_URL}/conversations/delete/${sessionId}`,
     {
       method: "DELETE",
       headers: {  
@@ -75,21 +75,7 @@ export async function sendMessageToAPI(sessionId, persona, message) {
   if (!response.ok) throw new Error("Erro ao enviar mensagem");
   return await response.json();
 }
-// http://127.0.0.1:8000/personas
-// body:{
-//   "name": "sdasdas1",
-//   "age": 12,
-//   "location": "string",
-//   "description": "string",
-//   "education": "string",
-//   "tech_skills": "string",
-//   "soft_skills": "string",
-//   "strenghts": "string",
-//   "weaknesses": "string",
-//   "goals": "string",
-//   "hobbies": "string",
-//   "personality": "string"
-// }
+
 export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality) {
   const response = await fetch(`http://127.0.0.1:8000/personas`, {
     method: "POST",
