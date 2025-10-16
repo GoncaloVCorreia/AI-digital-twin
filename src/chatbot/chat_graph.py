@@ -7,6 +7,8 @@ from typing import Annotated, TypedDict, List, Dict
 from typing_extensions import NotRequired
 import os
 import logging, time, sys
+from langgraph.prebuilt import create_react_agent
+from src.tools import get_user_repo_summary
 
 log = logging.getLogger("chat")
 handler = logging.StreamHandler(sys.stdout)
@@ -33,16 +35,29 @@ class ChatGraphRunner:
         self.memory = self._memory_cm.__enter__()
         log.info("ChatGraphRunner.__init__: calling memory.setup()")
         self.memory.setup()
+
+        self.agent = create_react_agent(llm.llm, tools=[get_user_repo_summary])
+
         log.info("ChatGraphRunner.__init__: building graph")
         builder = StateGraph(ChatState)
         
         def chatbot(state: ChatState) -> Dict[str, List]:
-            return {"messages": [llm.invoke(state["messages"])]}
+            
+            out = self.agent.invoke({"messages": state["messages"]})
+            # out["messages"] contains the entire transcript (old + new).
+            # We only want the messages added by this turn:
+            new_msgs = out["messages"][len(state["messages"]):]
+            # Safety: if nothing was added (shouldn’t happen), fall back to last item.
+            if not new_msgs and out["messages"]:
+                new_msgs = [out["messages"][-1]]
+            return {"messages": new_msgs}
+        
         builder.add_node("chatbot", chatbot)
         builder.add_edge(START, "chatbot")
         builder.add_edge("chatbot", END)
         self.graph = builder.compile(checkpointer=self.memory)
         log.info("ChatGraphRunner.__init__: graph compiled ✅")
+
     def stream_response(self, user_input: str, system_message: str, session_id: str):
         config = {"configurable": {"thread_id": session_id}}
 
