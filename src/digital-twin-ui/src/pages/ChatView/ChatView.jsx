@@ -5,7 +5,7 @@ import ChatWindow from "../../components/ChatWindow/ChatWindow";
 import ChatSidebar from "../../components/ChatWindow/ChatSidebar";
 import "./ChatView.css";
 // import "../../styles.css";
-import { fetchConversations, fetchConversationBySessionId, sendMessageToAPI } from "../../api/chatApi";
+import { fetchConversations, fetchConversationBySessionId, sendMessageToAPI, fetchAllPersonas } from "../../api/chatApi";
 import PersonaCreateForm from "../../components/PersonaSelector/PersonaCreateForm";
 
 export default function ChatView() {
@@ -28,7 +28,25 @@ export default function ChatView() {
   const [showPersonaCreate, setShowPersonaCreate] = useState(false);
   const [showPersonaCreatedPopup, setShowPersonaCreatedPopup] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
-  
+  const [personas, setPersonas] = useState([]);
+
+  // Fetch personas on mount
+  useEffect(() => {
+    async function loadPersonas() {
+      try {
+        const data = await fetchAllPersonas();
+        console.log("Fetched personas:", data);
+        // Handle different response structures - API returns {items: [], total: ...}
+        const personasArray = data?.items || [];
+        console.log("Personas array:", personasArray);
+        setPersonas(personasArray);
+      } catch (err) {
+        console.error("Erro ao buscar personas:", err);
+        setPersonas([]);
+      }
+    }
+    loadPersonas();
+  }, []);
 
   // Fetch de todas as conversas reais do utilizador
   useEffect(() => {
@@ -211,6 +229,13 @@ export default function ChatView() {
     setShowPersonaPicker(true);
     setShowPersonaCreatedPopup(true);
     setTimeout(() => setShowPersonaCreatedPopup(false), 2000);
+    // Reload personas after creating a new one
+    fetchAllPersonas()
+      .then(data => {
+        const personasArray = data?.items || [];
+        setPersonas(personasArray);
+      })
+      .catch(err => console.error("Erro ao recarregar personas:", err));
   }
 
   function handleCancelPersonaCreate() {
@@ -297,6 +322,7 @@ export default function ChatView() {
                     setSelected={handlePersonaPick}
                     showAddButton={true}
                     onAddClick={handleShowPersonaCreate}
+                    personas={personas}
                   />
                   {conversations.length > 0 && (
                     <button
@@ -322,6 +348,7 @@ export default function ChatView() {
                     selected={selectedPersona}
                     setSelected={setSelectedPersona}
                     persona={selectedPersona}
+                    personas={personas}
                   />
                 </aside>
 
