@@ -98,7 +98,10 @@ export async function createNewPersona(name,age,location,description,education,t
       personality
     }),
   });
-  if (!response.ok) throw new Error("Erro ao criar nova persona");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar nova persona");
+  }
   return await response.json();
 }
 

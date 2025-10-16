@@ -1,17 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const username = localStorage.getItem("username");
-  const token = localStorage.getItem("access_token");
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    setIsLoggedIn(!!token);
+  }, []);
 
   function logout() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("username");
     localStorage.removeItem("id");
-    navigate("/login");
+    setIsLoggedIn(false);
   }
 
   return (
@@ -20,20 +26,22 @@ export default function HomePage() {
         <h1>🤖 Digital Twin Chatbot</h1>
         <p className="subtitle">Making interviews easier and more autonomous</p>
 
-        {username && <h2 className="welcome">Bem-vindo, {username} 👋</h2>}
+        {isLoggedIn && username && (
+          <h2 className="welcome">Bem-vindo, {username} 👋</h2>
+        )}
 
         <div className="home-buttons">
-          {/* Só mostra login e register se não estiver autenticado */}
-          {!token && (
+          {isLoggedIn ? (
+            <>
+              <button onClick={() => navigate("/chat")}>Go to Chat</button>
+              <button onClick={logout}>Logout</button>
+            </>
+          ) : (
             <>
               <button onClick={() => navigate("/login")}>Login</button>
               <button onClick={() => navigate("/register")}>Register</button>
             </>
           )}
-
-          {/* Mostra logout apenas se estiver autenticado */}
-          {token && <button onClick={logout}>Logout</button>}
-          {token && <button onClick={() => navigate("/chat")}>Go to Chat</button>}
         </div>
       </div>
     </div>

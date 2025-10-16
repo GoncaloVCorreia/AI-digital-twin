@@ -6,6 +6,7 @@ import "./ChatWindow.css";
 export default function ChatWindow({ persona, conversation, onSendMessage }) {
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const messagesRef = useRef(null);
   const lastSessionIdRef = useRef(null);
 
@@ -42,14 +43,12 @@ export default function ChatWindow({ persona, conversation, onSendMessage }) {
     const userMsg = { role: "user", text: message };
     setChat((prev) => [...prev, userMsg]);
     setMessage("");
-
-    if (conversation && onSendMessage) {
-      onSendMessage(conversation.id, userMsg);
-    }
+    setIsTyping(true); // Show typing indicator
 
     // Use real API to send message and get assistant reply
     if (conversation && conversation.session_id) {
       try {
+        // ALWAYS use the existing session_id - never pass null
         const res = await sendMessageToAPI(
           conversation.session_id,
           persona,
@@ -68,15 +67,19 @@ export default function ChatWindow({ persona, conversation, onSendMessage }) {
         } else if (res.message) {
           assistantText = res.message;
         }
+        setIsTyping(false); // Hide typing indicator
         const aiMsg = {
           role: "assistant",
           text: assistantText,
         };
         setChat((prev) => [...prev, aiMsg]);
-        if (conversation && onSendMessage) {
+        
+        // Notify parent with the SAME conversation.id, not a new one
+        if (onSendMessage) {
           onSendMessage(conversation.id, aiMsg);
         }
       } catch (err) {
+        setIsTyping(false); // Hide typing indicator on error
         const aiMsg = {
           role: "assistant",
           text: "Erro ao obter resposta do assistente.",
@@ -115,6 +118,15 @@ export default function ChatWindow({ persona, conversation, onSendMessage }) {
               content={m.content || m.text}
             />
           ))}
+        {isTyping && (
+          <div className="typing-indicator">
+            <div className="typing-bubble">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        )}
       </div>
       <div className="input-area">
         <input
@@ -124,7 +136,9 @@ export default function ChatWindow({ persona, conversation, onSendMessage }) {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
-        <button onClick={sendMessage}>Enviar</button>
+        <button onClick={sendMessage}>
+          <span>Enviar</span>
+        </button>
       </div>
     </div>
   );

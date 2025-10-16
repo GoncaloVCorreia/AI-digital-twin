@@ -4,10 +4,10 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  height: 300px;
   align-items: center;
   justify-content: center;
   width: 100%;
+  height: auto; /* remove fixed height */
 }
 
 .persona-panel .persona-circle {
