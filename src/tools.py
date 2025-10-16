@@ -1,9 +1,17 @@
 import os, json, requests
 from collections import Counter
 from typing import Optional, Dict, Any, List
+from langchain_core.tools import tool
+
+@tool
 def get_user_repo_summary(username: str, token: Optional[str] = None) -> Dict[str, Any]:
     """
-    Return summary for a GitHub user:
+    Tool that returns a GitHub user repository summary.
+    Args:
+      - username: GitHub username (required)
+      - token: Optional GitHub token for higher rate limits (not required)
+
+    Return  Dict[str, Any] summary for a GitHub user:
       - repo_count (public)
       - repos: [{name, description, language, html_url}]
       - top_languages: [{language, count, percent}]
