@@ -101,3 +101,15 @@ export async function createNewPersona(name,age,location,description,education,t
   if (!response.ok) throw new Error("Erro ao criar nova persona");
   return await response.json();
 }
+
+export async function fetchAllPersonas() {
+  const response = await fetch(`http://127.0.0.1:8000/personas`, {
+    method: "GET",
+    headers: {
+      ...getAuthHeader(),
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) throw new Error("Erro ao buscar personas");
+  return await response.json();
+}
