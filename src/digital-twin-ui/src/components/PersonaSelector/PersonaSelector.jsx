@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import "./PersonaSelector.css";
 
-export default function PersonaSelector({ selected, setSelected, horizontal, persona, showAddButton, onAddClick, personas = [] }) {
+export default function PersonaSelector({ selected, setSelected, horizontal, persona, showAddButton, onAddClick, personas = [], disabled = false }) {
   // Debug: log personas to see what we're receiving
   useEffect(() => {
     console.log("PersonaSelector received personas:", personas);
@@ -33,7 +33,7 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
   }
 
   return (
-    <div className={`persona-selector${horizontal ? " horizontal" : ""}`}>
+    <div className={`persona-selector${horizontal ? " horizontal" : ""}${disabled ? " disabled" : ""}`}>
       {horizontal
         ? (
           <>
@@ -43,8 +43,9 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
                 <div
                   key={p.id || p.name}
                   id={`persona-${p.name}`}
-                  className={`persona-circle${isActive ? " active" : ""}`}
-                  onClick={() => setSelected(p.name)}
+                  className={`persona-circle${isActive ? " active" : ""}${disabled ? " disabled" : ""}`}
+                  onClick={() => !disabled && setSelected(p.name)}
+                  style={{ cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 }}
                 >
                   <img
                     src={getAvatarUrl(p.name)}
@@ -58,9 +59,10 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
             })}
             {showAddButton && (
               <div
-                className="persona-circle persona-add-circle"
-                onClick={onAddClick}
+                className={`persona-circle persona-add-circle${disabled ? " disabled" : ""}`}
+                onClick={() => !disabled && onAddClick()}
                 title="Adicionar nova persona"
+                style={{ cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 }}
               >
                 <img
                   src="/avatars/plus.png"

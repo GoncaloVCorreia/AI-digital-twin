@@ -90,7 +90,7 @@
   flex: 1;
   display: flex;
   gap: 16px;
-  align-items: flex-start; /* coloca o chat no topo */
+  align-items: stretch; /* change from flex-start to stretch */
   padding: 12px;
   box-sizing: border-box;
 }
@@ -108,12 +108,11 @@
   width: 220px; /* ajusta conforme preferência */
   flex-shrink: 0;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding-top: 6px; /* posição inicial mais alta */
-  padding-left: 8px; /* alinhamento à esquerda */
+  align-items: center; /* center vertically */
+  justify-content: center; /* center horizontally */
+  padding: 0; /* remove padding */
   position: relative;
-  top: 0;
+  height: 100%; /* ensure full height */
 }
 
 /* responsivo: em ecrãs pequenos empilhar verticalmente (chat acima, selector abaixo) */
@@ -137,9 +136,9 @@
 .right-panel .persona-panel [class*="persona"] {
   transform: none !important;
   transition: none !important; /* remove animações de deslocamento */
-  margin: 6px 0; /* espaçamento consistente entre items */
+  margin: 0; /* remove margin for better centering */
   padding: 4px 6px;
-  text-align: left;
+  text-align: center; /* center text */
 }
 
 /* Cobrir estados ativos/selecionados comuns */

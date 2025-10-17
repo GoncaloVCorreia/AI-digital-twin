@@ -46,7 +46,7 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
       setLoading(false);
       if (onCreated) onCreated();
     } catch (err) {
-      setError("Erro ao criar persona.");
+      setError(err.message || "Erro ao criar persona.");
       setLoading(false);
     }
   }
@@ -159,7 +159,11 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
             color: "#fff",
             border: "none",
             fontWeight: 600,
+            cursor: "pointer",
+            transition: "background 0.2s",
           }}
+          onMouseEnter={(e) => !loading && (e.target.style.background = "#0056b3")}
+          onMouseLeave={(e) => (e.target.style.background = "#3a8bfd")}
         >
           {loading ? "A criar..." : "Criar"}
         </button>
@@ -173,7 +177,11 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
             color: "#222",
             border: "none",
             fontWeight: 600,
+            cursor: "pointer",
+            transition: "background 0.2s",
           }}
+          onMouseEnter={(e) => (e.target.style.background = "#bbb")}
+          onMouseLeave={(e) => (e.target.style.background = "#ddd")}
         >
           Cancelar
         </button>

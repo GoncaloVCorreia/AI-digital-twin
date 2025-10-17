@@ -92,13 +92,37 @@
   cursor: pointer;
   font-size: 1.08rem;
   box-shadow: 0 1px 4px rgba(58,139,253,0.10);
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.2s, transform 0.1s;
   letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.input-area button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #0056b3;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 8px;
+  z-index: 0;
+}
+
+.input-area button:hover::before {
+  opacity: 1;
 }
 
 .input-area button:hover {
-  background: #0056b3;
   box-shadow: 0 2px 8px rgba(58,139,253,0.18);
+}
+
+.input-area button span {
+  position: relative;
+  z-index: 1;
 }
 
 /* Responsivo para telas médias */
@@ -157,10 +181,6 @@
   white-space: pre-wrap;
 }
 
-
-
-
-
 /* Estilo para o título da persona no topo da janela do chat */
 .chat-persona-title {
   width: 100%;
@@ -173,4 +193,54 @@
   letter-spacing: 0.5px;
   border-bottom: 1px solid #e3e9f9;
   margin-bottom: 0;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  align-self: flex-start;
+}
+
+.typing-bubble {
+  background: #f1f1f1;
+  border-radius: 18px;
+  padding: 12px 18px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.typing-bubble span {
+  width: 8px;
+  height: 8px;
+  background: #999;
+  border-radius: 50%;
+  display: inline-block;
+  animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.typing-bubble span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-bubble span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-bubble span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
 }

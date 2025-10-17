@@ -22,13 +22,14 @@ export default function ChatView() {
   // Remover hardcoded persona inicial
   const [selectedPersona, setSelectedPersona] = useState(null);
   const [conversations, setConversations] = useState([]);
-  const [currentChatId, setCurrentChatId] = useState(null);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [showPersonaPicker, setShowPersonaPicker] = useState(false);
   const [showPersonaCreate, setShowPersonaCreate] = useState(false);
   const [showPersonaCreatedPopup, setShowPersonaCreatedPopup] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [personas, setPersonas] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   // Fetch personas on mount
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function ChatView() {
     let mounted = true;
 
     async function loadConversations() {
+      setIsLoading(true); // Start loading
       try {
         const data = await fetchConversations(interviewerId);
         if (mounted) {
@@ -68,12 +70,12 @@ export default function ChatView() {
               const tb = new Date(b.created_at || b.updated_at || 0).getTime();
               return tb - ta;
             });
-            setCurrentChatId(sorted[0].id);
+            setCurrentSessionId(sorted[0].session_id);
             setShowPersonaPicker(false);
           } else {
             // No conversations, show persona picker
             setShowPersonaPicker(true);
-            setCurrentChatId(null);
+            setCurrentSessionId(null);
             setCurrentConversation(null);
             setSelectedPersona(null);
           }
@@ -84,9 +86,13 @@ export default function ChatView() {
         if (mounted) {
           setConversations([]);
           setShowPersonaPicker(true);
-          setCurrentChatId(null);
+          setCurrentSessionId(null);
           setCurrentConversation(null);
           setSelectedPersona(null);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false); // End loading
         }
       }
     }
@@ -97,15 +103,14 @@ export default function ChatView() {
 
   // ✅ Fetch da conversa atual quando o utilizador clica numa
   useEffect(() => {
-    if (!conversations || conversations.length === 0 || !currentChatId) return;
-    const conv = conversations.find((c) => c.id === currentChatId);
+    if (!conversations || conversations.length === 0 || !currentSessionId) return;
+    const conv = conversations.find((c) => c.session_id === currentSessionId);
     if (!conv) return;
-    const { session_id } = conv;
 
     let mounted = true;
     async function loadConversation() {
       try {
-        const conv = await fetchConversationBySessionId(session_id);
+        const conv = await fetchConversationBySessionId(currentSessionId);
         if (mounted) setCurrentConversation(conv);
         console.log("Current conversation loaded:", conv);
       } catch (err) {
@@ -115,27 +120,25 @@ export default function ChatView() {
 
     loadConversation();
     return () => (mounted = false);
-  }, [currentChatId, conversations]);
+  }, [currentSessionId, conversations]);
 
-  // Sync persona with selected chat whenever currentChatId or conversations change
+  // Sync persona with selected chat
   useEffect(() => {
-    if (!conversations || conversations.length === 0 || !currentChatId) return;
-    const conv = conversations.find((c) => c.id === currentChatId);
+    if (!conversations || conversations.length === 0 || !currentSessionId) return;
+    const conv = conversations.find((c) => c.session_id === currentSessionId);
     if (conv && conv.persona) {
       setSelectedPersona(conv.persona);
     }
-    // Remover else que coloca null
-  }, [currentChatId, conversations]);
+  }, [currentSessionId, conversations]);
 
-  function onSelectConversation(id) {
-    setCurrentChatId(id);
+  function onSelectConversation(sessionId) {
+    setCurrentSessionId(sessionId);
     setShowPersonaPicker(false);
     setShowPersonaCreate(false);
-    const conv = conversations.find((c) => c.id === id);
+    const conv = conversations.find((c) => c.session_id === sessionId);
     if (conv && conv.persona) {
       setSelectedPersona(conv.persona);
-    } else if (!id) {
-      // If id is null (all conversations deleted), clear everything
+    } else if (!sessionId) {
       setSelectedPersona(null);
       setCurrentConversation(null);
     }
@@ -144,46 +147,40 @@ export default function ChatView() {
   // Add handler to refresh conversations after sending a message
   async function handleSendMessage(chatId, msg) {
     // reload current conversation
-    if (currentChatId && currentConversation) {
-      const conv = conversations.find((c) => c.id === currentChatId);
-      if (conv && conv.session_id) {
-        try {
-          const updatedConv = await fetchConversationBySessionId(conv.session_id);
-          setCurrentConversation(updatedConv);
-        } catch (err) {
-          // ignore error
-        }
+    if (currentSessionId && currentConversation) {
+      try {
+        const updatedConv = await fetchConversationBySessionId(currentSessionId);
+        setCurrentConversation(updatedConv);
+      } catch (err) {
+        console.error("Error reloading conversation:", err);
       }
     }
+    
     // reload conversations list to update sidebar last message
     try {
       const interviewerId = localStorage.getItem("id");
       const updatedList = await fetchConversations(interviewerId);
       setConversations(updatedList);
     } catch (err) {
-      // ignore error
+      console.error("Error fetching conversations:", err);
     }
   }
 
   // Corrigir lógica para garantir que seleciona a conversa nova correta
   async function handleNewChat(persona) {
-    setIsCreatingChat(true);
-    setCurrentConversation(null); // Clear current conversation immediately
+    setCurrentConversation(null);
     try {
       const interviewerId = localStorage.getItem("id");
       await sendMessageToAPI(null, persona, "Olá!");
       const updatedList = await fetchConversations(interviewerId);
       setConversations(updatedList);
 
-      // Encontrar a conversa mais recente que ainda não estava na lista anterior
       let newConv = null;
       if (updatedList.length > conversations.length) {
-        // Nova conversa é aquela que não estava antes
-        const oldIds = new Set(conversations.map(c => c.id));
-        newConv = updatedList.find(c => !oldIds.has(c.id) && c.persona === persona);
+        const oldSessionIds = new Set(conversations.map(c => c.session_id));
+        newConv = updatedList.find(c => !oldSessionIds.has(c.session_id) && c.persona === persona);
       }
       if (!newConv) {
-        // fallback: encontrar a mais recente para a persona
         const personaConvs = updatedList.filter(c => c.persona === persona);
         if (personaConvs.length > 0) {
           personaConvs.sort((a, b) => {
@@ -195,7 +192,7 @@ export default function ChatView() {
         }
       }
       if (newConv) {
-        setCurrentChatId(newConv.id);
+        setCurrentSessionId(newConv.session_id);
         setSelectedPersona(newConv.persona);
         if (newConv.session_id) {
           const conv = await fetchConversationBySessionId(newConv.session_id);
@@ -216,6 +213,7 @@ export default function ChatView() {
 
   async function handlePersonaPick(persona) {
     setShowPersonaPicker(false);
+    setIsCreatingChat(true); // Show loading immediately
     await handleNewChat(persona);
   }
 
@@ -245,22 +243,15 @@ export default function ChatView() {
 
   function handleConversationsUpdate(updatedList) {
     console.log("=== handleConversationsUpdate called ===");
-    console.log("Current conversations:", conversations);
-    console.log("Updated list:", updatedList);
-    console.log("Updated list length:", updatedList.length);
-    
     setConversations(updatedList);
     
-    // If no conversations left, show persona picker
     if (updatedList.length === 0) {
       console.log("No conversations left, showing persona picker");
       setShowPersonaPicker(true);
-      setCurrentChatId(null);
+      setCurrentSessionId(null);
       setCurrentConversation(null);
       setSelectedPersona(null);
     }
-    
-    console.log("=== handleConversationsUpdate complete ===");
   }
 
   return (
@@ -306,7 +297,13 @@ export default function ChatView() {
       <div className="chat-main-grid">
         <div className="chat-main-content">
           <div className="chat-container">
-            {showPersonaCreate ? (
+            {isLoading ? (
+              <div className="right-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center', color: '#3a8bfd', fontSize: '1.2rem', fontWeight: 600 }}>
+                  A carregar...
+                </div>
+              </div>
+            ) : showPersonaCreate ? (
               <div className="right-panel persona-create-panel">
                 <PersonaCreateForm
                   onCreated={handlePersonaCreated}
@@ -323,12 +320,14 @@ export default function ChatView() {
                     showAddButton={true}
                     onAddClick={handleShowPersonaCreate}
                     personas={personas}
+                    disabled={isCreatingChat}
                   />
                   {conversations.length > 0 && (
                     <button
                       className="new-chat-btn persona-cancel-btn"
                       style={{ marginTop: "32px" }}
                       onClick={() => setShowPersonaPicker(false)}
+                      disabled={isCreatingChat}
                     >
                       Cancelar
                     </button>
@@ -367,7 +366,7 @@ export default function ChatView() {
         {/* Mantém sidebar à direita */}
         <ChatSidebar
           conversations={conversations}
-          currentChatId={currentChatId}
+          currentSessionId={currentSessionId}
           onSelectConversation={onSelectConversation}
           onNewChat={handleNewChatButton}
           onConversationsUpdate={handleConversationsUpdate}

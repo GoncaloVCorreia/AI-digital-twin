@@ -36,23 +36,23 @@
   animation: fadeInBubble 0.4s;
 }
 
-/* Selected state - covers all cases */
+/* Selected state - simplified */
 .chat-sidebar ul li.selected,
-.chat-sidebar ul li.always-selected,
 .chat-sidebar ul li.selected:hover,
 .chat-sidebar ul li.selected:active,
 .chat-sidebar ul li.selected:focus,
-.chat-sidebar ul li.always-selected:hover,
-.chat-sidebar ul li.always-selected:active,
-.chat-sidebar ul li.always-selected:focus,
 .chat-item.selected,
 .chat-item.selected:hover,
 .chat-item.selected:active,
-.chat-item.selected:focus {
+.chat-item.selected:focus,
+.chat-sidebar .chat-item.selected,
+.chat-sidebar .chat-item.selected:hover,
+.chat-sidebar ul .chat-item.selected,
+.chat-sidebar ul .chat-item.selected:hover {
   background: linear-gradient(90deg, #3a8bfd 60%, #0056b3 100%) !important;
   color: #fff !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10) !important;
 }
 
 /* Hover effect for non-selected items */

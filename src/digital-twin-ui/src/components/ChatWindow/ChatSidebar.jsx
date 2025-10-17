@@ -5,17 +5,17 @@ import { deleteConversationBySessionId, fetchConversations } from "../../api/cha
 
 export default function ChatSidebar({
   conversations,
-  currentChatId,
+  currentSessionId,
   onSelectConversation,
   onNewChat,
-  onConversationsUpdate, // Add this prop
+  onConversationsUpdate,
 }) {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState(null);
 
   // Adiciona função para apagar conversa e atualizar lista
   async function handleDeleteConversation(conv) {
-    if (!window.confirm("Apagar esta conversa?")) return;
-    
     const interviewerId = localStorage.getItem("id");
     
     try {
@@ -42,10 +42,10 @@ export default function ChatSidebar({
       }
       
       // Handle selection after update
-      if (conv.id === currentChatId) {
+      if (conv.session_id === currentSessionId) {
         if (updatedList.length > 0) {
-          console.log("Selecting first conversation:", updatedList[0].id);
-          onSelectConversation(updatedList[0].id);
+          console.log("Selecting first conversation:", updatedList[0].session_id);
+          onSelectConversation(updatedList[0].session_id);
         } else {
           console.log("No conversations left, clearing selection");
           onSelectConversation(null);
@@ -53,17 +53,32 @@ export default function ChatSidebar({
       }
     } catch (refreshErr) {
       console.error("Erro ao atualizar lista:", refreshErr);
-      // If we get a 404 or error fetching conversations, treat it as empty list
       console.log("Error fetching conversations (likely 404), treating as empty list");
       
-      // Notify parent with empty array
       if (onConversationsUpdate) {
         onConversationsUpdate([]);
       }
       
-      // Clear selection
       onSelectConversation(null);
     }
+  }
+
+  function confirmDelete(conv) {
+    setConversationToDelete(conv);
+    setShowConfirmPopup(true);
+  }
+
+  function handleConfirmDelete() {
+    if (conversationToDelete) {
+      handleDeleteConversation(conversationToDelete);
+    }
+    setShowConfirmPopup(false);
+    setConversationToDelete(null);
+  }
+
+  function handleCancelDelete() {
+    setShowConfirmPopup(false);
+    setConversationToDelete(null);
   }
 
   return (
@@ -75,19 +90,96 @@ export default function ChatSidebar({
             top: "80px",
             left: "50%",
             transform: "translateX(-50%)",
-            background: "#e74c3c",
+            background: "#3a8bfd",
             color: "#fff",
             padding: "16px 32px",
             borderRadius: "12px",
             fontWeight: 600,
             fontSize: "1.15rem",
             zIndex: 9999,
-            boxShadow: "0 2px 12px rgba(231,76,60,0.18)",
+            boxShadow: "0 2px 12px rgba(58,139,253,0.18)",
             transition: "opacity 0.3s"
           }}
         >
           Conversa apagada com sucesso!
         </div>
+      )}
+      {showConfirmPopup && (
+        <>
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.5)",
+              zIndex: 9998,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+            onClick={handleCancelDelete}
+          >
+            <div
+              style={{
+                background: "#fff",
+                padding: "32px",
+                borderRadius: "16px",
+                maxWidth: "400px",
+                width: "90%",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                textAlign: "center"
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ margin: "0 0 16px 0", fontSize: "1.3rem", color: "#222" }}>
+                Apagar conversa?
+              </h3>
+              <p style={{ margin: "0 0 24px 0", color: "#666", fontSize: "1rem" }}>
+                Esta ação não pode ser desfeita.
+              </p>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+                <button
+                  onClick={handleCancelDelete}
+                  style={{
+                    padding: "10px 24px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "#ddd",
+                    color: "#222",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontSize: "1rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseEnter={(e) => (e.target.style.background = "#bbb")}
+                  onMouseLeave={(e) => (e.target.style.background = "#ddd")}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  style={{
+                    padding: "10px 24px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "#e74c3c",
+                    color: "#fff",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontSize: "1rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseEnter={(e) => (e.target.style.background = "#c0392b")}
+                  onMouseLeave={(e) => (e.target.style.background = "#e74c3c")}
+                >
+                  Apagar
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
       <div className="sidebar-header sidebar-header--sticky">
         <h3 className="sidebar-title">Chats</h3>
@@ -142,14 +234,15 @@ export default function ChatSidebar({
                   lastMsg = words.slice(0, 5).join(" ");
                   if (words.length > 5) lastMsg += " ...";
                 }
-                const isSelected = String(conv.id) === String(currentChatId);
+                
+                // Direct comparison - no need for local state
+                const isSelected = currentSessionId !== null && conv.session_id === currentSessionId;
+                
                 return (
                   <li
-                    key={conv.id}
-                    className={`chat-item${
-                      isSelected ? " selected" : ""
-                    }`}
-                    onClick={() => onSelectConversation(conv.id)}
+                    key={conv.session_id}
+                    className={`chat-item${isSelected ? " selected" : ""}`}
+                    onClick={() => onSelectConversation(conv.session_id)}
                     style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
                   >
                     <span style={{ flex: 1, cursor: "pointer" }}>
@@ -160,7 +253,7 @@ export default function ChatSidebar({
                       title="Apagar conversa"
                       onClick={e => {
                         e.stopPropagation();
-                        handleDeleteConversation(conv);
+                        confirmDelete(conv);
                       }}
                       style={{
                         background: "none",
