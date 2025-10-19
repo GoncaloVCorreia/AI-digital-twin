@@ -4,7 +4,7 @@ Persona Pydantic schemas.
 
 from __future__ import annotations
 
-from typing import Generic, List, Optional, TypeVar
+from typing import Generic, List, Optional, TypeVar, Union
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
@@ -39,6 +39,7 @@ class PersonaBase(BaseModel):
     goals: str = Field(..., min_length=1, max_length=MAX_LEN)
     hobbies: str = Field(..., min_length=1, max_length=MAX_LEN)
     personality: str = Field(..., min_length=1, max_length=MAX_LEN)
+    data_path: Optional[str] = Field("",  max_length=MAX_LEN)
 
     @field_validator(
         "name",
@@ -62,6 +63,15 @@ class PersonaBase(BaseModel):
                 raise ValueError("Field must be a non-empty string")
             return vs
         return v
+    @field_validator("data_path", mode="before")
+    @classmethod
+    def normalize_data_path(cls, v: Union[str, None]) -> str:
+        # Allow None -> "", allow empty after strip
+        if v is None:
+            return ""
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 
 class PersonaCreate(PersonaBase):
@@ -83,6 +93,7 @@ class PersonaUpdate(BaseModel):
     goals: Optional[str] = Field(None, min_length=1, max_length=MAX_LEN)
     hobbies: Optional[str] = Field(None, min_length=1, max_length=MAX_LEN)
     personality: Optional[str] = Field(None, min_length=1, max_length=MAX_LEN)
+    data_path: Optional[str] = Field(None, max_length=MAX_LEN)
 
 
 class Persona(PersonaBase):

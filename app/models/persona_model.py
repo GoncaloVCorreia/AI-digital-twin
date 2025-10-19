@@ -45,6 +45,7 @@ class Persona(Base):
     goals = Column(String(512), nullable=False)
     hobbies = Column(String(512), nullable=False)
     personality = Column(String(512), nullable=False)
+    data_path = Column(String(1024), nullable=True, server_default="")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
