@@ -230,10 +230,112 @@
   color: #fff;
 }
 
-/* Remove old button styles */
-.persona-selector.horizontal .persona-add-btn,
-.persona-picker-panel .persona-selector .persona-add-btn {
-  display: none;
+/* Delete button - same style as add button */
+.persona-selector.horizontal .persona-delete-circle,
+.persona-picker-panel .persona-selector .persona-delete-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 120px;
+  height: 140px;
+  min-width: 120px;
+  min-height: 140px;
+  max-width: 140px;
+  max-height: 160px;
+  background: #f1f1f1;
+  border-radius: 18px;
+  border: none;
+  box-shadow: none;
+  font-weight: bold;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  padding: 0;
+  position: relative;
+}
+
+.persona-selector.horizontal .persona-delete-circle:hover,
+.persona-picker-panel .persona-selector .persona-delete-circle:hover {
+  background: linear-gradient(90deg, #fd3a3a 60%, #b30000 100%);
+  color: #fff;
+}
+
+.persona-selector.horizontal .persona-delete-circle.active,
+.persona-picker-panel .persona-selector .persona-delete-circle.active {
+  background: linear-gradient(90deg, #fd3a3a 60%, #b30000 100%);
+  color: #fff;
+}
+
+.persona-selector.horizontal .persona-delete-circle .persona-avatar,
+.persona-picker-panel .persona-selector .persona-delete-circle .persona-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: none;
+  background: none;
+  border: none;
+  margin-bottom: 8px;
+}
+
+.persona-selector.horizontal .persona-delete-circle .persona-name,
+.persona-picker-panel .persona-selector .persona-delete-circle .persona-name {
+  font-size: 1.15rem;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #222;
+  margin-top: 0;
+  margin-bottom: 8px;
+  transition: color 0.2s;
+}
+
+.persona-selector.horizontal .persona-delete-circle:hover .persona-name,
+.persona-picker-panel .persona-selector .persona-delete-circle:hover .persona-name,
+.persona-selector.horizontal .persona-delete-circle.active .persona-name,
+.persona-picker-panel .persona-selector .persona-delete-circle.active .persona-name {
+  color: #fff;
+}
+
+/* Delete mode styles */
+.persona-selector.delete-mode .persona-circle.deletable {
+  position: relative;
+  border: 2px solid #fd3a3a;
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+.persona-selector.delete-mode .persona-circle.deletable:hover {
+  background: linear-gradient(90deg, #fd3a3a 60%, #b30000 100%);
+  transform: scale(1.05);
+}
+
+.delete-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: #fd3a3a;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    border-color: #fd3a3a;
+    box-shadow: 0 0 0 0 rgba(253, 58, 58, 0.4);
+  }
+  50% {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 8px rgba(253, 58, 58, 0);
+  }
 }
 
 /* Formulário de criação de persona */

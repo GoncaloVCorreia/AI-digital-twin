@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import "./PersonaSelector.css";
 
-export default function PersonaSelector({ selected, setSelected, horizontal, persona, showAddButton, onAddClick, personas = [], disabled = false }) {
+export default function PersonaSelector({ selected, setSelected, horizontal, persona, showAddButton, onAddClick, personas = [], disabled = false, deleteMode = false, onDeleteClick, onPersonaDelete }) {
   // Debug: log personas to see what we're receiving
   useEffect(() => {
     console.log("PersonaSelector received personas:", personas);
@@ -33,7 +33,7 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
   }
 
   return (
-    <div className={`persona-selector${horizontal ? " horizontal" : ""}${disabled ? " disabled" : ""}`}>
+    <div className={`persona-selector${horizontal ? " horizontal" : ""}${disabled ? " disabled" : ""}${deleteMode ? " delete-mode" : ""}`}>
       {horizontal
         ? (
           <>
@@ -43,9 +43,16 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
                 <div
                   key={p.id || p.name}
                   id={`persona-${p.name}`}
-                  className={`persona-circle${isActive ? " active" : ""}${disabled ? " disabled" : ""}`}
-                  onClick={() => !disabled && setSelected(p.name)}
-                  style={{ cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 }}
+                  className={`persona-circle${isActive ? " active" : ""}${disabled ? " disabled" : ""}${deleteMode ? " deletable" : ""}`}
+                  onClick={() => {
+                    if (disabled) return;
+                    if (deleteMode) {
+                      onPersonaDelete && onPersonaDelete(p);
+                    } else {
+                      setSelected(p.name);
+                    }
+                  }}
+                  style={{ cursor: disabled ? 'not-allowed' : (deleteMode ? 'pointer' : 'pointer'), opacity: disabled ? 0.6 : 1 }}
                 >
                   <img
                     src={getAvatarUrl(p.name)}
@@ -54,6 +61,7 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
                     onError={handleImageError}
                   />
                   <span className="persona-name">{p.name}</span>
+                  {deleteMode && <div className="delete-overlay">×</div>}
                 </div>
               );
             })}
@@ -71,6 +79,22 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
                   onError={handleImageError}
                 />
                 <span className="persona-name">Adicionar</span>
+              </div>
+            )}
+            {showAddButton && (
+              <div
+                className={`persona-circle persona-delete-circle${disabled ? " disabled" : ""}${deleteMode ? " active" : ""}`}
+                onClick={() => !disabled && onDeleteClick && onDeleteClick()}
+                title={deleteMode ? "Cancelar exclusão" : "Excluir persona"}
+                style={{ cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 }}
+              >
+                <img
+                  src="/avatars/delete.png"
+                  alt="delete"
+                  className="persona-avatar"
+                  onError={handleImageError}
+                />
+                <span className="persona-name">{deleteMode ? "Cancelar" : "Excluir"}</span>
               </div>
             )}
           </>

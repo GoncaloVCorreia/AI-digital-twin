@@ -5,21 +5,50 @@ import ChatWindow from "../../components/ChatWindow/ChatWindow";
 import ChatSidebar from "../../components/ChatWindow/ChatSidebar";
 import "./ChatView.css";
 // import "../../styles.css";
-import { fetchConversations, fetchConversationBySessionId, sendMessageToAPI, fetchAllPersonas } from "../../api/chatApi";
+import { fetchConversations, fetchConversationBySessionId, sendMessageToAPI, fetchAllPersonas, deletePersonaById, deleteConversationBySessionId } from "../../api/chatApi";
 import PersonaCreateForm from "../../components/PersonaSelector/PersonaCreateForm";
 
-export default function ChatView() {
-  const navigate = useNavigate();
-  const username = localStorage.getItem("username");
 
-  function logout() {
+export default function ChatView() {
+  // Add monitoring for localStorage changes
+  useEffect(() => {
+    const originalSetItem = localStorage.setItem;
+    const originalRemoveItem = localStorage.removeItem;
+    const originalClear = localStorage.clear;
+
+    localStorage.setItem = function(key, value) {
+      console.log(`📝 localStorage.setItem called:`, key, value);
+      console.trace();
+      return originalSetItem.apply(this, arguments);
+    };
+
+    localStorage.removeItem = function(key) {
+      console.log(`🗑️ localStorage.removeItem called:`, key);
+      console.trace();
+      return originalRemoveItem.apply(this, arguments);
+    };
+
+    localStorage.clear = function() {
+      console.log(`💥 localStorage.clear called!`);
+      console.trace();
+      return originalClear.apply(this, arguments);
+    };
+
+    return () => {
+      localStorage.setItem = originalSetItem;
+      localStorage.removeItem = originalRemoveItem;
+      localStorage.clear = originalClear;
+    };
+  }, []);
+
+    function logout() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("username");
     localStorage.removeItem("id");
     navigate("/login");
   }
-
-  // Remover hardcoded persona inicial
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
   const [selectedPersona, setSelectedPersona] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState(null);
@@ -29,61 +58,75 @@ export default function ChatView() {
   const [showPersonaCreatedPopup, setShowPersonaCreatedPopup] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [personas, setPersonas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [showPersonaDeletedPopup, setShowPersonaDeletedPopup] = useState(false);
+  const [showConfirmDeletePersona, setShowConfirmDeletePersona] = useState(false);
+  const [personaToDelete, setPersonaToDelete] = useState(null);
 
-  // Fetch personas on mount
+  // Combined initialization effect - load personas and conversations together
   useEffect(() => {
-    async function loadPersonas() {
-      try {
-        const data = await fetchAllPersonas();
-        console.log("Fetched personas:", data);
-        // Handle different response structures - API returns {items: [], total: ...}
-        const personasArray = data?.items || [];
-        console.log("Personas array:", personasArray);
-        setPersonas(personasArray);
-      } catch (err) {
-        console.error("Erro ao buscar personas:", err);
-        setPersonas([]);
-      }
-    }
-    loadPersonas();
-  }, []);
-
-  // Fetch de todas as conversas reais do utilizador
-  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const storedUsername = localStorage.getItem("username");
     const interviewerId = localStorage.getItem("id");
+    
+    // Check auth first
+    if (!token || !interviewerId) {
+      navigate("/login");
+      return;
+    }
+    
+    setUsername(storedUsername || "");
+    
     let mounted = true;
 
-    async function loadConversations() {
-      setIsLoading(true); // Start loading
+    async function loadInitialData() {
+      setIsLoading(true);
+      
       try {
-        const data = await fetchConversations(interviewerId);
-        if (mounted) {
-          // Handle case where API returns null, undefined, or empty array
-          const convList = data || [];
-          setConversations(convList);
-          
-          if (convList.length > 0) {
-            // Ordena por data (descendente)
-            const sorted = [...convList].sort((a, b) => {
-              const ta = new Date(a.created_at || a.updated_at || 0).getTime();
-              const tb = new Date(b.created_at || b.updated_at || 0).getTime();
-              return tb - ta;
-            });
-            setCurrentSessionId(sorted[0].session_id);
-            setShowPersonaPicker(false);
-          } else {
-            // No conversations, show persona picker
-            setShowPersonaPicker(true);
-            setCurrentSessionId(null);
-            setCurrentConversation(null);
-            setSelectedPersona(null);
-          }
+        // Load both personas and conversations in parallel
+        const [personasData, conversationsData] = await Promise.all([
+          fetchAllPersonas(),
+          fetchConversations(interviewerId)
+        ]);
+        
+        if (!mounted) return;
+        
+        // Handle personas
+        const personasArray = personasData?.items || [];
+        console.log("Fetched personas:", personasData);
+        console.log("Personas array:", personasArray);
+        setPersonas(personasArray);
+        
+        // Handle conversations
+        const convList = conversationsData || [];
+        setConversations(convList);
+        
+        if (convList.length > 0) {
+          const sorted = [...convList].sort((a, b) => {
+            const ta = new Date(a.created_at || a.updated_at || 0).getTime();
+            const tb = new Date(b.created_at || b.updated_at || 0).getTime();
+            return tb - ta;
+          });
+          setCurrentSessionId(sorted[0].session_id);
+          setShowPersonaPicker(false);
+        } else {
+          setShowPersonaPicker(true);
+          setCurrentSessionId(null);
+          setCurrentConversation(null);
+          setSelectedPersona(null);
         }
       } catch (err) {
-        console.error("Erro ao buscar conversas:", err);
-        // On error, also show persona picker
+        console.error("Erro ao carregar dados iniciais:", err);
+        
+        if (err.message.includes("401") || err.message.includes("Unauthorized")) {
+          console.log("Authentication failed, redirecting to login");
+          navigate("/login");
+          return;
+        }
+        
         if (mounted) {
+          setPersonas([]);
           setConversations([]);
           setShowPersonaPicker(true);
           setCurrentSessionId(null);
@@ -92,14 +135,14 @@ export default function ChatView() {
         }
       } finally {
         if (mounted) {
-          setIsLoading(false); // End loading
+          setIsLoading(false);
         }
       }
     }
 
-    loadConversations();
-    return () => (mounted = false);
-  }, []);
+    loadInitialData();
+    return () => { mounted = false; };
+  }, [navigate]);
 
   // ✅ Fetch da conversa atual quando o utilizador clica numa
   useEffect(() => {
@@ -241,6 +284,110 @@ export default function ChatView() {
     setShowPersonaPicker(true);
   }
 
+  function handleDeleteClick() {
+    setDeleteMode(!deleteMode);
+  }
+
+  async function handlePersonaDelete(persona) {
+    if (!persona || !persona.id) {
+      console.error("Invalid persona for deletion");
+      return;
+    }
+
+    setPersonaToDelete(persona);
+    setShowConfirmDeletePersona(true);
+  }
+
+  async function confirmPersonaDeletion() {
+    if (!personaToDelete) return;
+
+    try {
+      // First, find and delete all conversations with this persona
+      const conversationsToDelete = conversations.filter(
+        conv => conv.persona?.toLowerCase() === personaToDelete.name?.toLowerCase()
+      );
+      
+      console.log(`Deleting ${conversationsToDelete.length} conversations for persona ${personaToDelete.name}`);
+      
+      // Delete all conversations associated with this persona
+      await Promise.all(
+        conversationsToDelete.map(conv => 
+          deleteConversationBySessionId(conv.session_id).catch(err => {
+            console.error(`Error deleting conversation ${conv.session_id}:`, err);
+          })
+        )
+      );
+      
+      // Then delete the persona
+      await deletePersonaById(personaToDelete.id);
+      
+      // Refresh the personas list
+      const data = await fetchAllPersonas();
+      const personasArray = data?.items || [];
+      setPersonas(personasArray);
+      
+      // Refresh the conversations list
+      const interviewerId = localStorage.getItem("id");
+      let updatedList = [];
+      
+      try {
+        updatedList = await fetchConversations(interviewerId);
+      } catch (err) {
+        console.error("Error fetching conversations after persona deletion:", err);
+        // If error is 404 or any fetch error, treat as no conversations
+        if (err.message.includes("404") || err.message.includes("Failed to fetch")) {
+          updatedList = [];
+        }
+      }
+      
+      // Update conversations state
+      setConversations(updatedList);
+      
+      // Handle UI state based on remaining conversations
+      if (updatedList.length === 0) {
+        // No conversations left, show persona picker
+        setCurrentSessionId(null);
+        setCurrentConversation(null);
+        setSelectedPersona(null);
+        setShowPersonaPicker(true);
+      } else {
+        // Check if current conversation was deleted
+        const currentConvDeleted = conversationsToDelete.some(
+          conv => conv.session_id === currentSessionId
+        );
+        
+        if (currentConvDeleted) {
+          // Select the first remaining conversation
+          const sorted = [...updatedList].sort((a, b) => {
+            const ta = new Date(a.created_at || a.updated_at || 0).getTime();
+            const tb = new Date(b.created_at || b.updated_at || 0).getTime();
+            return tb - ta;
+          });
+          setCurrentSessionId(sorted[0].session_id);
+          setSelectedPersona(sorted[0].persona);
+          setShowPersonaPicker(false);
+        }
+      }
+      
+      setDeleteMode(false);
+
+      // Show success message
+      setShowPersonaDeletedPopup(true);
+      setTimeout(() => setShowPersonaDeletedPopup(false), 2000);
+    } catch (err) {
+      console.error("Error deleting persona:", err);
+      alert("Erro ao excluir persona: " + err.message);
+    } finally {
+      setShowConfirmDeletePersona(false);
+      setPersonaToDelete(null);
+    }
+  }
+
+  function cancelPersonaDeletion() {
+    setShowConfirmDeletePersona(false);
+    setPersonaToDelete(null);
+  }
+
   function handleConversationsUpdate(updatedList) {
     console.log("=== handleConversationsUpdate called ===");
     setConversations(updatedList);
@@ -294,6 +441,104 @@ export default function ChatView() {
           Persona criada com sucesso!
         </div>
       )}
+      {showPersonaDeletedPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: "80px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "#3a8bfd",
+            color: "#fff",
+            padding: "16px 32px",
+            borderRadius: "12px",
+            fontWeight: 600,
+            fontSize: "1.15rem",
+            zIndex: 9999,
+            boxShadow: "0 2px 12px rgba(58,139,253,0.18)",
+            transition: "opacity 0.3s"
+          }}
+        >
+          Persona apagada com sucesso!
+        </div>
+      )}
+      {showConfirmDeletePersona && (
+        <>
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.5)",
+              zIndex: 9998,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+            onClick={cancelPersonaDeletion}
+          >
+            <div
+              style={{
+                background: "#fff",
+                padding: "32px",
+                borderRadius: "16px",
+                maxWidth: "400px",
+                width: "90%",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                textAlign: "center"
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ margin: "0 0 16px 0", fontSize: "1.3rem", color: "#222" }}>
+                Apagar persona "{personaToDelete?.name}"?
+              </h3>
+              <p style={{ margin: "0 0 24px 0", color: "#666", fontSize: "1rem" }}>
+                Esta ação não pode ser desfeita.
+              </p>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+                <button
+                  onClick={cancelPersonaDeletion}
+                  style={{
+                    padding: "10px 24px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "#ddd",
+                    color: "#222",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontSize: "1rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseEnter={(e) => (e.target.style.background = "#bbb")}
+                  onMouseLeave={(e) => (e.target.style.background = "#ddd")}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmPersonaDeletion}
+                  style={{
+                    padding: "10px 24px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "#e74c3c",
+                    color: "#fff",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontSize: "1rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseEnter={(e) => (e.target.style.background = "#c0392b")}
+                  onMouseLeave={(e) => (e.target.style.background = "#e74c3c")}
+                >
+                  Apagar
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       <div className="chat-main-grid">
         <div className="chat-main-content">
           <div className="chat-container">
@@ -321,12 +566,18 @@ export default function ChatView() {
                     onAddClick={handleShowPersonaCreate}
                     personas={personas}
                     disabled={isCreatingChat}
+                    deleteMode={deleteMode}
+                    onDeleteClick={handleDeleteClick}
+                    onPersonaDelete={handlePersonaDelete}
                   />
                   {conversations.length > 0 && (
                     <button
                       className="new-chat-btn persona-cancel-btn"
                       style={{ marginTop: "32px" }}
-                      onClick={() => setShowPersonaPicker(false)}
+                      onClick={() => {
+                        setShowPersonaPicker(false);
+                        setDeleteMode(false);
+                      }}
                       disabled={isCreatingChat}
                     >
                       Cancelar
