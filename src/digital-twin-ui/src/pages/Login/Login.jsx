@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({
-    username: "", // mudado de email para username
+    username: "",
     password: "",
   });
 
@@ -22,7 +22,6 @@ export default function Login() {
     setError("");
 
     try {
-      // Cria os dados x-www-form-urlencoded
       const body = new URLSearchParams();
       body.append("username", form.username);
       body.append("password", form.password);
@@ -45,8 +44,9 @@ export default function Login() {
       }
 
       localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("username", form.username); 
-      localStorage.setItem("id", data.id); // store user ID
+      localStorage.setItem("username", form.username);
+      localStorage.setItem("id", data.id);
+      
       console.log("Login bem-sucedido:", data);
 
       navigate("/");

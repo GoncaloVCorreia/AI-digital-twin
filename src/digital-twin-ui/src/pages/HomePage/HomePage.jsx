@@ -5,12 +5,22 @@ import "./HomePage.css";
 export default function HomePage() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const username = localStorage.getItem("username");
+  const [username, setUsername] = useState("");
 
-  // Check authentication status on mount
+  // Check authentication status on mount and when storage changes
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    setIsLoggedIn(!!token);
+    const checkAuth = () => {
+      const token = localStorage.getItem("access_token");
+      const storedUsername = localStorage.getItem("username");
+      setIsLoggedIn(!!token);
+      setUsername(storedUsername || "");
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (e.g., logout in another tab)
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
   }, []);
 
   function logout() {
@@ -18,6 +28,7 @@ export default function HomePage() {
     localStorage.removeItem("username");
     localStorage.removeItem("id");
     setIsLoggedIn(false);
+    setUsername("");
   }
 
   return (

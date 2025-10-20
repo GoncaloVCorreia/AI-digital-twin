@@ -15,6 +15,7 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
     goals: "",
     hobbies: "",
     personality: "",
+    data_path: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +42,8 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
         form.weaknesses,
         form.goals,
         form.hobbies,
-        form.personality
+        form.personality,
+        form.data_path
       );
       setLoading(false);
       if (onCreated) onCreated();
@@ -59,6 +61,7 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
     "description",
     "education",
     "tech_skills",
+    "data_path",
   ];
   const rightFields = [
     "soft_skills",
