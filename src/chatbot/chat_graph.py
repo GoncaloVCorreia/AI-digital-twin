@@ -8,7 +8,7 @@ from typing_extensions import NotRequired
 import os
 import logging, time, sys
 from langgraph.prebuilt import create_react_agent
-from src.tools import get_user_repo_summary
+from src.tools import get_user_repo_summary, get_date, calories_burned, average_calories_per_day, max_daily_calories, longest_run, average_steps_per_day, max_steps_day
 
 log = logging.getLogger("chat")
 handler = logging.StreamHandler(sys.stdout)
@@ -36,7 +36,7 @@ class ChatGraphRunner:
         log.info("ChatGraphRunner.__init__: calling memory.setup()")
         self.memory.setup()
 
-        self.agent = create_react_agent(llm.llm, tools=[get_user_repo_summary])
+        self.agent = create_react_agent(llm.llm, tools=[get_user_repo_summary, get_date, calories_burned, average_calories_per_day, max_daily_calories, longest_run, average_steps_per_day, max_steps_day])
 
         log.info("ChatGraphRunner.__init__: building graph")
         builder = StateGraph(ChatState)

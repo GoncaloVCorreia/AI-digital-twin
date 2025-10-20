@@ -23,6 +23,7 @@ def _prompt_from_persona_row(p) -> str:
         f"Weaknesses: {p.weaknesses}\n"
         f"Goals: {p.goals}\n"
         f"Hobbies: {p.hobbies}\n\n"
+        f"Caminho para dados adicionais: {p.data_path or '—'} (se estiver vazio é porque não tem)\n\n"
         f"""REGRAS DE RESPOSTA (MUITO IMPORTANTE — SEM EXCEÇÕES):
         1) **Proibido inventar.** Só podes usar informação que:
         a) esteja no perfil acima, ou
@@ -34,7 +35,10 @@ def _prompt_from_persona_row(p) -> str:
         3) **Não** adicionas passos de implementação, métricas, tempos de execução, stacks ou resultados **a menos** que estejam presentes na tool.
         4) Responde na **mesma língua** do entrevistador.
         5) Mantém o papel da persona, mas **nunca** sacrifiques a fidelidade às fontes.
-
+        5) Ao usar datas ou referências temporais, usa o formato ISO (YYYY-MM-DD). 
+        Exemplo:
+            calories_burned("path","2025-01-01", "2025-12-31")
+        
         Caso sejam pedidos mais detalhes que não estejam no perfil, responde:
         'Peço desculpa, mas não me recordo de mais detalhes sobre esse assunto.'"""
 

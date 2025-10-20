@@ -2,6 +2,277 @@ import os, json, requests
 from collections import Counter
 from typing import Optional, Dict, Any, List
 from langchain_core.tools import tool
+import duckdb
+from datetime import datetime
+from pathlib import Path
+from typing import Optional, Dict, Any, List
+import duckdb
+from datetime import datetime
+from pathlib import Path
+from typing import Union, Dict, Any
+
+
+def _connect(path:str) -> duckdb.DuckDBPyConnection:
+    """Create an in-memory DuckDB connection and expose a 'health' view over all parquet files."""
+    con = duckdb.connect(database=":memory:")
+    con.execute(f"""
+        CREATE OR REPLACE VIEW health AS
+        SELECT * FROM read_parquet('{Path(path)}/**/*.parquet', filename=true);
+    """)
+    return con
+
+def _parse_dt(x: Union[str, datetime]) -> datetime:
+    """Parse ISO date string or passthrough datetime to a datetime object."""
+    if isinstance(x, datetime):
+        return x
+    return datetime.fromisoformat(str(x))
+
+@tool
+def get_date() -> str:
+    """
+    Tool that returns the current date in ISO format (YYYY-MM-DD).
+    """
+    return datetime.utcnow().date().isoformat()
+
+# ---- 1) Total calories in period (and split) ----
+@tool
+def calories_burned(path:str, start_date: Union[str, datetime], end_date: Union[str, datetime]) -> Dict[str, float]:
+    """
+    Tool that returns total, active, and basal calories burned within a period.
+
+    Args:
+        path: path to health parquet data
+        start_date: inclusive lower bound (ISO date string or datetime)
+        end_date:   exclusive upper bound (ISO date string or datetime)
+
+    Returns:
+        Dict[str, float]: {
+            "total_calories_kcal": float,
+            "active_calories_kcal": float,
+            "basal_calories_kcal": float
+        }
+    """
+    start_ts = _parse_dt(start_date); end_ts = _parse_dt(end_date)
+    con = _connect(path)
+    q = """
+    SELECT
+      SUM(CASE WHEN "@type" IN (
+            'HKQuantityTypeIdentifierActiveEnergyBurned',
+            'HKQuantityTypeIdentifierBasalEnergyBurned'
+          ) THEN CAST("@value" AS DOUBLE) ELSE 0 END) AS total_calories,
+      SUM(CASE WHEN "@type"='HKQuantityTypeIdentifierActiveEnergyBurned'
+               THEN CAST("@value" AS DOUBLE) ELSE 0 END) AS active_calories,
+      SUM(CASE WHEN "@type"='HKQuantityTypeIdentifierBasalEnergyBurned'
+               THEN CAST("@value" AS DOUBLE) ELSE 0 END) AS basal_calories
+    FROM health
+    WHERE "@startDate" >= ? AND "@startDate" < ?
+    """
+    row = con.execute(q, [start_ts, end_ts]).fetchone()
+    con.close()
+    return {
+        "total_calories_kcal": float(row[0] or 0.0),
+        "active_calories_kcal": float(row[1] or 0.0),
+        "basal_calories_kcal": float(row[2] or 0.0),
+    }
+
+
+# ---- 1b) Average calories per day in period ----
+@tool
+def average_calories_per_day(path:str, start_date: Union[str, datetime], end_date: Union[str, datetime]) -> float:
+    """
+    Tool that returns the average calories per day (active + basal) within a period.
+
+    Args:
+        path: path to health parquet data
+        start_date: inclusive lower bound (ISO string or datetime)
+        end_date:   exclusive upper bound (ISO string or datetime)
+
+    Returns:
+        float: average kcal per day
+    """
+    start_ts = _parse_dt(start_date); end_ts = _parse_dt(end_date)
+    con = _connect(path)
+    q = """
+    WITH daily AS (
+      SELECT
+        date_trunc('day', "@startDate") AS day,
+        SUM(CASE WHEN "@type" IN (
+            'HKQuantityTypeIdentifierActiveEnergyBurned',
+            'HKQuantityTypeIdentifierBasalEnergyBurned'
+        ) THEN CAST("@value" AS DOUBLE) ELSE 0 END) AS calories
+      FROM health
+      WHERE "@startDate" >= ? AND "@startDate" < ?
+      GROUP BY 1
+    )
+    SELECT AVG(calories) FROM daily
+    """
+    row = con.execute(q, [start_ts, end_ts]).fetchone()
+    con.close()
+    return float(row[0] or 0.0)
+
+
+# ---- 2) Max calories day in period ----
+@tool
+def max_daily_calories(path:str, start_date: Union[str, datetime], end_date: Union[str, datetime]) -> Dict[str, Any]:
+    """
+    Tool that returns the day with the maximum total calories (active + basal) and its value.
+
+    Args:
+        path: path to health parquet data
+        start_date: inclusive lower bound (ISO string or datetime)
+        end_date:   exclusive upper bound (ISO string or datetime)
+
+    Returns:
+        Dict[str, Any]: {"day": datetime | None, "calories_kcal": float}
+    """
+    start_ts = _parse_dt(start_date); end_ts = _parse_dt(end_date)
+    con = _connect(path)
+    q = """
+    WITH daily AS (
+      SELECT
+        date_trunc('day', "@startDate") AS day,
+        SUM(CASE WHEN "@type" IN (
+              'HKQuantityTypeIdentifierActiveEnergyBurned',
+              'HKQuantityTypeIdentifierBasalEnergyBurned'
+            ) THEN CAST("@value" AS DOUBLE) ELSE 0 END) AS calories
+      FROM health
+      WHERE "@startDate" >= ? AND "@startDate" < ?
+      GROUP BY 1
+    )
+    SELECT day, calories
+    FROM daily
+    ORDER BY calories DESC
+    LIMIT 1
+    """
+    row = con.execute(q, [start_ts, end_ts]).fetchone()
+    con.close()
+    if not row:
+        return {"day": None, "calories_kcal": 0.0}
+    return {"day": row[0], "calories_kcal": float(row[1] or 0.0)}
+
+
+# ---- 3) Longest run day in period ----
+@tool
+def longest_run(path:str, start_date: Union[str, datetime], end_date: Union[str, datetime]) -> Dict[str, Any]:
+    """
+    Tool that returns the day with the longest total walking/running distance (km).
+
+    Notes:
+        - Uses 'HKQuantityTypeIdentifierDistanceWalkingRunning'
+        - Converts meters to km when needed and sums per day.
+
+    Args:
+        path: path to health parquet data
+        start_date: inclusive lower bound (ISO string or datetime)
+        end_date:   exclusive upper bound (ISO string or datetime)
+
+    Returns:
+        Dict[str, Any]: {"day": datetime | None, "distance_km": float}
+    """
+    start_ts = _parse_dt(start_date); end_ts = _parse_dt(end_date)
+    con = _connect(path)
+    q = """
+    WITH runs AS (
+      SELECT
+        date_trunc('day', "@startDate") AS day,
+        CASE
+          WHEN "@type"='HKQuantityTypeIdentifierDistanceWalkingRunning' AND "@unit"='m'
+            THEN CAST("@value" AS DOUBLE)/1000.0
+          WHEN "@type"='HKQuantityTypeIdentifierDistanceWalkingRunning' AND "@unit"='km'
+            THEN CAST("@value" AS DOUBLE)
+          ELSE NULL
+        END AS km
+      FROM health
+      WHERE "@startDate" >= ? AND "@startDate" < ?
+    ),
+    daily AS (
+      SELECT day, SUM(km) AS day_km
+      FROM runs
+      WHERE km IS NOT NULL
+      GROUP BY 1
+    )
+    SELECT day, day_km
+    FROM daily
+    ORDER BY day_km DESC
+    LIMIT 1
+    """
+    row = con.execute(q, [start_ts, end_ts]).fetchone()
+    con.close()
+    if not row:
+        return {"day": None, "distance_km": 0.0}
+    return {"day": row[0], "distance_km": float(row[1] or 0.0)}
+
+
+# ---- 4) Average steps per day ----
+@tool
+def average_steps_per_day(path:str, start_date: Union[str, datetime], end_date: Union[str, datetime]) -> float:
+    """
+    Tool that returns the average number of steps per day in a period.
+
+    Args:
+        path: path to health parquet data
+        start_date: inclusive lower bound (ISO string or datetime)
+        end_date:   exclusive upper bound (ISO string or datetime)
+
+    Returns:
+        float: average daily steps
+    """
+    start_ts = _parse_dt(start_date); end_ts = _parse_dt(end_date)
+    con = _connect(path)
+    q = """
+    WITH daily AS (
+      SELECT
+        date_trunc('day', "@startDate") AS day,
+        SUM(CASE WHEN "@type"='HKQuantityTypeIdentifierStepCount'
+                 THEN CAST("@value" AS DOUBLE) ELSE 0 END) AS steps
+      FROM health
+      WHERE "@startDate" >= ? AND "@startDate" < ?
+      GROUP BY 1
+    )
+    SELECT AVG(steps) AS avg_steps
+    FROM daily
+    """
+    row = con.execute(q, [start_ts, end_ts]).fetchone()
+    con.close()
+    return float(row[0] or 0.0)
+
+
+# ---- 4b) Day with max steps ----
+@tool
+def max_steps_day(path:str, start_date: Union[str, datetime], end_date: Union[str, datetime]) -> Dict[str, Any]:
+    """
+    Tool that returns the day with the maximum total steps and the step count.
+
+    Args:
+        path: path to health parquet data
+        start_date: inclusive lower bound (ISO string or datetime)
+        end_date:   exclusive upper bound (ISO string or datetime)
+
+    Returns:
+        Dict[str, Any]: {"day": datetime | None, "steps": int}
+    """
+    start_ts = _parse_dt(start_date); end_ts = _parse_dt(end_date)
+    con = _connect(path)
+    q = """
+    WITH daily AS (
+      SELECT
+        date_trunc('day', "@startDate") AS day,
+        SUM(CASE WHEN "@type"='HKQuantityTypeIdentifierStepCount'
+                 THEN CAST("@value" AS DOUBLE) ELSE 0 END) AS steps
+      FROM health
+      WHERE "@startDate" >= ? AND "@startDate" < ?
+      GROUP BY 1
+    )
+    SELECT day, steps
+    FROM daily
+    ORDER BY steps DESC
+    LIMIT 1
+    """
+    row = con.execute(q, [start_ts, end_ts]).fetchone()
+    con.close()
+    if not row:
+        return {"day": None, "steps": 0}
+    return {"day": row[0], "steps": int(row[1] or 0)}
 
 @tool
 def get_user_repo_summary(username: str, token: Optional[str] = None) -> Dict[str, Any]:
