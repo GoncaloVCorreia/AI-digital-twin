@@ -1,5 +1,4 @@
 const BASE_URL = process.env.REACT_APP_API_URL || "https://ai-digital-twin-production.up.railway.app";
-console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
 
 function getAuthHeader() {
   // Force a fresh read every time
@@ -9,7 +8,7 @@ function getAuthHeader() {
     console.warn("⚠️ getAuthHeader called but no token found!");
     console.trace(); // Show where this was called from
   }
-  
+
   if (process.env.NODE_ENV === 'development') {
     console.log("🔑 Using token for API call:", token ? `${token.substring(0, 20)}...` : "NO TOKEN");
   }
@@ -109,6 +108,21 @@ export async function sendMessageToAPI(sessionId, persona, message) {
   return await response.json();
 }
 
+function formatValidationError(errorDetail) {
+  if (Array.isArray(errorDetail)) {
+    return errorDetail.map(err => {
+      const field = err.loc ? err.loc.slice(1).join('.') : 'unknown field';
+      
+      if (err.type === 'string_too_long') {
+        return `${field}: Maximum ${err.ctx.max_length} characters allowed (current: ${err.input?.length || 'unknown'})`;
+      }
+      
+      return `${field}: ${err.msg}`;
+    }).join('\n');
+  }
+  return typeof errorDetail === 'string' ? errorDetail : 'Validation error';
+}
+
 export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality,data_path,avatar) {
   const response = await fetch(`${BASE_URL}/personas/`, {
     method: "POST",
@@ -130,11 +144,36 @@ export async function createNewPersona(name,age,location,description,education,t
       hobbies,
       personality,
       data_path,
-      avatar  // Add this line
+      avatar
     }),
   });
+
+  console.log("Data sent to create persona:", {
+    name,
+    age,
+    location,
+    description,
+    education,
+    tech_skills,
+    soft_skills,
+    strenghts,
+    weaknesses,
+    goals,
+    hobbies,
+    personality,
+    data_path,
+    avatar
+  });
+  
   if (!response.ok) {
     const errorData = await response.json();
+    
+    // Handle validation errors
+    if (errorData.detail && Array.isArray(errorData.detail)) {
+      const formattedError = formatValidationError(errorData.detail);
+      throw new Error(`Validation error:\n${formattedError}`);
+    }
+    
     throw new Error(errorData.detail || "Erro ao criar nova persona");
   }
   return await response.json();
