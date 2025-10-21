@@ -110,7 +110,7 @@ export default function ChatWindow({ persona, conversation, onSendMessage }) {
       </div>
       <div className="messages" ref={messagesRef}>
         {chat
-          .filter((m) => m.role === "user" || m.role === "assistant")
+          .filter((m) => (m.role === "user" || m.role === "assistant") && (m.content || m.text || "").trim())
           .map((m, i) => (
             <MessageBubble
               key={i}
@@ -132,12 +132,12 @@ export default function ChatWindow({ persona, conversation, onSendMessage }) {
         <input
           type="text"
           value={message}
-          placeholder="Escreve uma mensagem..."
+          placeholder="Type a message..."
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button onClick={sendMessage}>
-          <span>Enviar</span>
+          <span>Send</span>
         </button>
       </div>
     </div>

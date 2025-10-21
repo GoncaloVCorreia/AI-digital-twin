@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function HomePage() {
+  const { darkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
@@ -33,12 +35,19 @@ export default function HomePage() {
 
   return (
     <div className="home-container">
+      <button 
+        className="theme-toggle-btn" 
+        onClick={toggleDarkMode}
+        title={darkMode ? "Light Mode" : "Dark Mode"}
+      >
+        {darkMode ? "☀️" : "🌙"}
+      </button>
       <div className="home-content-box">
         <h1>🤖 Digital Twin Chatbot</h1>
         <p className="subtitle">Making interviews easier and more autonomous</p>
 
         {isLoggedIn && username && (
-          <h2 className="welcome">Bem-vindo, {username} 👋</h2>
+          <h2 className="welcome">Welcome, {username} 👋</h2>
         )}
 
         <div className="home-buttons">

@@ -76,16 +76,9 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
     <form
       className="persona-create-form"
       onSubmit={handleSubmit}
-      style={{
-        maxWidth: 800,
-        margin: "0 auto",
-        padding: 24,
-        background: "#f8f8f8",
-        borderRadius: 12,
-      }}
     >
-      <h2 style={{ textAlign: "center", marginBottom: 16 }}>Nova Persona</h2>
-      <div className="persona-create-form-fields" style={{ display: "flex" }}>
+      <h2 style={{ textAlign: "center", marginBottom: 16, color: "var(--text-primary)" }}>Nova Persona</h2>
+      <div className="persona-create-form-fields" style={{ display: "flex", gap: "24px", width: "100%" }}>
         <div className="persona-create-form-col" style={{ flex: 1, marginRight: 12 }}>
           {leftFields.map((key) => (
             <div key={key} style={{ marginBottom: 12 }}>
@@ -94,6 +87,7 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
                   fontWeight: 500,
                   display: "block",
                   marginBottom: 4,
+                  color: "var(--text-primary)",
                 }}
               >
                 {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -108,7 +102,9 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
                   width: "100%",
                   padding: "8px",
                   borderRadius: 6,
-                  border: "1px solid #ddd",
+                  border: "1px solid var(--border-color)",
+                  background: "var(--input-bg)",
+                  color: "var(--text-primary)",
                 }}
               />
             </div>
@@ -122,6 +118,7 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
                   fontWeight: 500,
                   display: "block",
                   marginBottom: 4,
+                  color: "var(--text-primary)",
                 }}
               >
                 {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -136,14 +133,16 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
                   width: "100%",
                   padding: "8px",
                   borderRadius: 6,
-                  border: "1px solid #ddd",
+                  border: "1px solid var(--border-color)",
+                  background: "var(--input-bg)",
+                  color: "var(--text-primary)",
                 }}
               />
             </div>
           ))}
         </div>
       </div>
-      {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
+      {error && <div style={{ color: "#e74c3c", marginBottom: 8 }}>{error}</div>}
       <div
         style={{
           display: "flex",
@@ -162,11 +161,13 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
             color: "#fff",
             border: "none",
             fontWeight: 600,
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
+            fontSize: "1rem",
             transition: "background 0.2s",
+            opacity: loading ? 0.6 : 1,
           }}
           onMouseEnter={(e) => !loading && (e.target.style.background = "#0056b3")}
-          onMouseLeave={(e) => (e.target.style.background = "#3a8bfd")}
+          onMouseLeave={(e) => !loading && (e.target.style.background = "#3a8bfd")}
         >
           {loading ? "A criar..." : "Criar"}
         </button>
@@ -176,15 +177,16 @@ export default function PersonaCreateForm({ onCreated, onCancel }) {
           style={{
             padding: "8px 18px",
             borderRadius: 8,
-            background: "#ddd",
-            color: "#222",
-            border: "none",
+            background: "var(--bg-tertiary)",
+            color: "var(--text-primary)",
+            border: "1px solid var(--border-color)",
             fontWeight: 600,
             cursor: "pointer",
+            fontSize: "1rem",
             transition: "background 0.2s",
           }}
-          onMouseEnter={(e) => (e.target.style.background = "#bbb")}
-          onMouseLeave={(e) => (e.target.style.background = "#ddd")}
+          onMouseEnter={(e) => (e.target.style.background = "var(--border-color)")}
+          onMouseLeave={(e) => (e.target.style.background = "var(--bg-tertiary)")}
         >
           Cancelar
         </button>

@@ -1,18 +1,19 @@
 import React, { useState } from "react";
 import "./Register.css";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function Register() {
+  const { darkMode, toggleDarkMode } = useTheme();
   const [form, setForm] = useState({
-    email: "",
     username: "",
     full_name: "",
+    email: "",
     password: "",
   });
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(""); // mensagem de sucesso/erro
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,7 +23,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setFieldErrors({}); // limpa erros anteriores
+    setError("");
 
     try {
       const response = await fetch(
@@ -39,26 +40,14 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        // data.detail é um array de erros ou uma string
-        const errors = {};
-        if (Array.isArray(data.detail)) {
-          data.detail.forEach((err) => {
-            const field = err.loc[err.loc.length - 1]; // último item é o campo
-            errors[field] = err.msg;
-          });
-        } else {
-          // Se for string, mostrar como mensagem geral
-          setMessage(data.detail || "Erro ao registar utilizador");
-        }
-        setFieldErrors(errors);
-        throw new Error("Erro de validação");
+        throw new Error(data.detail || data.message || "Erro no registo");
       }
 
-      // sucesso
-      console.log("User registered successfully!", data);
+      console.log("Registo bem-sucedido:", data);
       navigate("/login");
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Erro:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -66,82 +55,56 @@ export default function Register() {
 
   return (
     <div className="register-container">
-      <h1>Criar Conta 🧑‍💻</h1>
+      <button
+        className="theme-toggle-btn"
+        onClick={toggleDarkMode}
+        title={darkMode ? "Light Mode" : "Dark Mode"}
+      >
+        {darkMode ? "☀️" : "🌙"}
+      </button>
+      <h1>Create Account</h1>
       <form onSubmit={handleSubmit} className="register-form">
-        <div className="input-wrapper">
-          <input
-            type="text"
-            name="username"
-            placeholder="Nome de utilizador"
-            value={form.username}
-            onChange={handleChange}
-            className={fieldErrors.username ? "error-input" : ""}
-            required
-          />
-          {fieldErrors.username && (
-            <span className="error-icon" data-msg={fieldErrors.username}>
-              ⚠️
-            </span>
-          )}
-        </div>
-        <div className="input-wrapper">
-          <input
-            type="text"
-            name="full_name"
-            placeholder="Nome completo"
-            value={form.full_name}
-            onChange={handleChange}
-            className={fieldErrors.full_name ? "error-input" : ""}
-            required
-          />
-          {fieldErrors.full_name && (
-            <span className="error-icon" data-msg={fieldErrors.full_name}>
-              ⚠️
-            </span>
-          )}
-        </div>
-        <div className="input-wrapper">
-          <input
-            type="text"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className={fieldErrors.email ? "error-input" : ""}
-            required
-          />
-          {fieldErrors.email && (
-            <span className="error-icon" data-msg={fieldErrors.email}>
-              ⚠️
-            </span>
-          )}
-        </div>
-        <div className="input-wrapper">
-          <input
-            type="password"
-            name="password"
-            placeholder="Palavra-passe"
-            value={form.password}
-            onChange={handleChange}
-            className={fieldErrors.password ? "error-input" : ""}
-            required
-          />
-          {fieldErrors.password && (
-            <span className="error-icon" data-msg={fieldErrors.password}>
-              ⚠️
-            </span>
-          )}
-        </div>
-
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={form.username}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="full_name"
+          placeholder="Full name"
+          value={form.name}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          required
+        />
         <button type="submit" disabled={loading}>
           {loading ? "Registering..." : "Register"}
         </button>
       </form>
 
-      {message && <p className="error">{message}</p>}
+      {error && <p className="error">{error}</p>}
 
       <p className="login-link" onClick={() => navigate("/login")}>
-        Já tens conta? Faz login
+        Already have an account? Log in
       </p>
     </div>
   );

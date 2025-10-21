@@ -7,9 +7,12 @@ import "./ChatView.css";
 // import "../../styles.css";
 import { fetchConversations, fetchConversationBySessionId, sendMessageToAPI, fetchAllPersonas, deletePersonaById, deleteConversationBySessionId } from "../../api/chatApi";
 import PersonaCreateForm from "../../components/PersonaSelector/PersonaCreateForm";
+import { useTheme } from "../../contexts/ThemeContext";
 
 
 export default function ChatView() {
+  const { darkMode, toggleDarkMode } = useTheme();
+
   // Add monitoring for localStorage changes
   useEffect(() => {
     const originalSetItem = localStorage.setItem;
@@ -84,21 +87,42 @@ export default function ChatView() {
       setIsLoading(true);
       
       try {
-        // Load both personas and conversations in parallel
-        const [personasData, conversationsData] = await Promise.all([
-          fetchAllPersonas(),
-          fetchConversations(interviewerId)
-        ]);
+        console.log("Starting to load initial data...");
+        
+        // Load personas first
+        const personasData = await fetchAllPersonas();
+        console.log("Raw personas data received:", personasData);
         
         if (!mounted) return;
         
-        // Handle personas
-        const personasArray = personasData?.items || [];
-        console.log("Fetched personas:", personasData);
-        console.log("Personas array:", personasArray);
+        // Handle personas with better validation
+        const personasArray = Array.isArray(personasData?.items) 
+          ? personasData.items 
+          : Array.isArray(personasData) 
+            ? personasData 
+            : [];
+        
+        console.log("Processed personas array:", personasArray);
         setPersonas(personasArray);
         
-        // Handle conversations
+        // Then load conversations - handle 404 gracefully
+        let conversationsData = [];
+        try {
+          conversationsData = await fetchConversations(interviewerId);
+          console.log("Conversations data received:", conversationsData);
+        } catch (convErr) {
+          console.log("No conversations found or error fetching conversations:", convErr);
+          // If 404, it just means no conversations exist yet - not an error
+          if (convErr.message.includes("404") || convErr.message.includes("Erro ao carregar conversas")) {
+            conversationsData = [];
+          } else {
+            // For other errors, rethrow
+            throw convErr;
+          }
+        }
+        
+        if (!mounted) return;
+        
         const convList = conversationsData || [];
         setConversations(convList);
         
@@ -111,6 +135,7 @@ export default function ChatView() {
           setCurrentSessionId(sorted[0].session_id);
           setShowPersonaPicker(false);
         } else {
+          console.log("No conversations, showing persona picker with personas:", personasArray);
           setShowPersonaPicker(true);
           setCurrentSessionId(null);
           setCurrentConversation(null);
@@ -126,8 +151,10 @@ export default function ChatView() {
         }
         
         if (mounted) {
-          setPersonas([]);
-          setConversations([]);
+          // Only reset personas if there was an error fetching them specifically
+          // Don't reset if conversations failed but personas succeeded
+          console.error("Critical error during initialization:", err);
+          // Keep whatever data was loaded successfully
           setShowPersonaPicker(true);
           setCurrentSessionId(null);
           setCurrentConversation(null);
@@ -135,6 +162,7 @@ export default function ChatView() {
         }
       } finally {
         if (mounted) {
+          console.log("Setting isLoading to false");
           setIsLoading(false);
         }
       }
@@ -271,9 +299,16 @@ export default function ChatView() {
     setShowPersonaCreatedPopup(true);
     setTimeout(() => setShowPersonaCreatedPopup(false), 2000);
     // Reload personas after creating a new one
+    console.log("Reloading personas after creation...");
     fetchAllPersonas()
       .then(data => {
-        const personasArray = data?.items || [];
+        console.log("Personas reloaded:", data);
+        const personasArray = Array.isArray(data?.items) 
+          ? data.items 
+          : Array.isArray(data) 
+            ? data 
+            : [];
+        console.log("Setting personas to:", personasArray);
         setPersonas(personasArray);
       })
       .catch(err => console.error("Erro ao recarregar personas:", err));
@@ -407,11 +442,17 @@ export default function ChatView() {
         <div className="user-info">
           <span className="username">👤 {username}</span>
         </div>
-        {/* Usa classe para o texto centralizado */}
         <div className="chat-header-title">
           Digital Twin Chatbot 🤖
         </div>
         <div className="header-buttons">
+          <button 
+            className="theme-btn" 
+            onClick={toggleDarkMode}
+            title={darkMode ? "Light Mode" : "Dark Mode"}
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
           <button className="home-btn" onClick={() => navigate("/")}>
             Home
           </button>
@@ -438,7 +479,7 @@ export default function ChatView() {
             transition: "opacity 0.3s"
           }}
         >
-          Persona criada com sucesso!
+          Persona created successfully!
         </div>
       )}
       {showPersonaDeletedPopup && (
@@ -459,7 +500,7 @@ export default function ChatView() {
             transition: "opacity 0.3s"
           }}
         >
-          Persona apagada com sucesso!
+          Persona deleted successfully!
         </div>
       )}
       {showConfirmDeletePersona && (
@@ -492,10 +533,10 @@ export default function ChatView() {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 style={{ margin: "0 0 16px 0", fontSize: "1.3rem", color: "#222" }}>
-                Apagar persona "{personaToDelete?.name}"?
+                Delete persona "{personaToDelete?.name}"?
               </h3>
               <p style={{ margin: "0 0 24px 0", color: "#666", fontSize: "1rem" }}>
-                Esta ação não pode ser desfeita.
+                This action cannot be undone.
               </p>
               <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
                 <button
@@ -514,7 +555,7 @@ export default function ChatView() {
                   onMouseEnter={(e) => (e.target.style.background = "#bbb")}
                   onMouseLeave={(e) => (e.target.style.background = "#ddd")}
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   onClick={confirmPersonaDeletion}
@@ -532,7 +573,7 @@ export default function ChatView() {
                   onMouseEnter={(e) => (e.target.style.background = "#c0392b")}
                   onMouseLeave={(e) => (e.target.style.background = "#e74c3c")}
                 >
-                  Apagar
+                  Delete
                 </button>
               </div>
             </div>
@@ -580,7 +621,7 @@ export default function ChatView() {
                       }}
                       disabled={isCreatingChat}
                     >
-                      Cancelar
+                      Cancel
                     </button>
                   )}
                 </div>
@@ -588,7 +629,7 @@ export default function ChatView() {
             ) : isCreatingChat ? (
               <div className="right-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center', color: '#3a8bfd', fontSize: '1.2rem', fontWeight: 600 }}>
-                  A criar novo chat...
+                  Creating chat...
                 </div>
               </div>
             ) : (

@@ -5,9 +5,10 @@
   min-height: 0;
   height: 100%;
   overflow: hidden;
-  background-color: #f7f7f7;
+  background-color: var(--bg-primary);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .chat-window .messages {
@@ -55,21 +56,22 @@
   gap: 10px;
   align-items: center;
   padding: 16px 18px 16px 18px; /* aumenta padding lateral e vertical */
-  background: #f7f7f7;
-  border-top: 1px solid #e3e9f9;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .input-area input {
   flex: 1;
   padding: 10px 16px;
   border-radius: 8px;
-  border: 1.5px solid #e3e9f9;
-  background: #fff;
-  color: #222;
+  border: 1.5px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-primary);
   font-size: 1.08rem;
   outline: none;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  transition: border 0.2s, box-shadow 0.2s;
+  transition: border 0.2s, box-shadow 0.2s, background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .input-area input::placeholder {
@@ -188,10 +190,10 @@
   text-align: center;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #000000;
+  color: var(--text-primary);
   background: none;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #e3e9f9;
+  border-bottom: 1px solid var(--border-color);
   margin-bottom: 0;
 }
 
@@ -204,22 +206,24 @@
 }
 
 .typing-bubble {
-  background: #f1f1f1;
+  background: var(--bg-secondary);
   border-radius: 18px;
   padding: 12px 18px;
   display: flex;
   gap: 6px;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: background 0.3s ease;
 }
 
 .typing-bubble span {
   width: 8px;
   height: 8px;
-  background: #999;
+  background: var(--text-secondary);
   border-radius: 50%;
   display: inline-block;
   animation: typing-bounce 1.4s infinite ease-in-out;
+  transition: background 0.3s ease;
 }
 
 .typing-bubble span:nth-child(1) {

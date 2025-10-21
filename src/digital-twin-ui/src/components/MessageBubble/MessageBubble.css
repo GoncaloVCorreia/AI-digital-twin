@@ -26,8 +26,8 @@
 }
 
 .message-bubble.assistant {
-  background: #f1f1f1;
-  color: #222;
+  background: var(--message-assistant-bg);
+  color: var(--text-primary);
   align-self: flex-start;
   border-bottom-left-radius: 6px;
   border-top-right-radius: 18px;
@@ -60,8 +60,8 @@
 }
 
 .message-bubble.assistant th {
-  background-color: #d8e2f9;
-  color: #222;
+  background-color: var(--table-header-bg);
+  color: var(--text-primary);
 }
 
 .message-bubble.user th {
@@ -70,8 +70,8 @@
 }
 
 .message-bubble.assistant td {
-  border-color: #ddd;
-  background-color: #fff;
+  border-color: var(--border-secondary);
+  background-color: var(--bg-secondary);
 }
 
 .message-bubble.user td {

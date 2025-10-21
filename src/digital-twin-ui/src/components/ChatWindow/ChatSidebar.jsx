@@ -101,7 +101,7 @@ export default function ChatSidebar({
             transition: "opacity 0.3s"
           }}
         >
-          Conversa apagada com sucesso!
+          Conversation deleted successfully!
         </div>
       )}
       {showConfirmPopup && (
@@ -134,10 +134,10 @@ export default function ChatSidebar({
               onClick={(e) => e.stopPropagation()}
             >
               <h3 style={{ margin: "0 0 16px 0", fontSize: "1.3rem", color: "#222" }}>
-                Apagar conversa?
+                Delete conversation?
               </h3>
               <p style={{ margin: "0 0 24px 0", color: "#666", fontSize: "1rem" }}>
-                Esta ação não pode ser desfeita.
+                This action cannot be undone.
               </p>
               <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
                 <button
@@ -156,7 +156,7 @@ export default function ChatSidebar({
                   onMouseEnter={(e) => (e.target.style.background = "#bbb")}
                   onMouseLeave={(e) => (e.target.style.background = "#ddd")}
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   onClick={handleConfirmDelete}
@@ -174,7 +174,7 @@ export default function ChatSidebar({
                   onMouseEnter={(e) => (e.target.style.background = "#c0392b")}
                   onMouseLeave={(e) => (e.target.style.background = "#e74c3c")}
                 >
-                  Apagar
+                  Delete
                 </button>
               </div>
             </div>
@@ -184,7 +184,7 @@ export default function ChatSidebar({
       <div className="sidebar-header sidebar-header--sticky">
         <h3 className="sidebar-title">Chats</h3>
         <button className="new-chat-btn" onClick={onNewChat}>
-          Novo Chat
+          New Chat
         </button>
       </div>
       <div className="sidebar-scrollable">
@@ -195,7 +195,7 @@ export default function ChatSidebar({
             color: '#666',
             fontSize: '1rem'
           }}>
-            Sem conversas
+            No conversations yet. Click "New Chat" to start one!
           </div>
         ) : (
           <ul>
@@ -250,7 +250,7 @@ export default function ChatSidebar({
                     </span>
                     <button
                       className="delete-chat-btn"
-                      title="Apagar conversa"
+                      title="Delete conversation"
                       onClick={e => {
                         e.stopPropagation();
                         confirmDelete(conv);
