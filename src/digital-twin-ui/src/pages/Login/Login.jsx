@@ -8,6 +8,7 @@ export default function Login() {
   const [form, setForm] = useState({
     username: "",
     password: "",
+    secret_key: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ export default function Login() {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": `Bearer ${form.secret_key}`,
           },
           body: body.toString(),
         }
@@ -85,6 +87,14 @@ export default function Login() {
           name="password"
           placeholder="Password"
           value={form.password}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="secret_key"
+          placeholder="Secret Key"
+          value={form.secret_key}
           onChange={handleChange}
           required
         />

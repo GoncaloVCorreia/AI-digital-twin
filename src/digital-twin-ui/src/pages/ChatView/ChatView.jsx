@@ -206,6 +206,7 @@ export default function ChatView() {
     setCurrentSessionId(sessionId);
     setShowPersonaPicker(false);
     setShowPersonaCreate(false);
+    setDeleteMode(false); // Exit deletion mode when selecting a conversation
     const conv = conversations.find((c) => c.session_id === sessionId);
     if (conv && conv.persona) {
       setSelectedPersona(conv.persona);
@@ -279,18 +280,21 @@ export default function ChatView() {
 
   async function handleNewChatButton() {
     setShowPersonaPicker(true);
-    setShowPersonaCreate(false); // fecha o form de criação se estiver aberto
+    setShowPersonaCreate(false);
+    setDeleteMode(false); // Exit deletion mode when clicking New Chat
   }
 
   async function handlePersonaPick(persona) {
     setShowPersonaPicker(false);
-    setIsCreatingChat(true); // Show loading immediately
+    setDeleteMode(false); // Exit deletion mode when picking a persona
+    setIsCreatingChat(true);
     await handleNewChat(persona);
   }
 
   function handleShowPersonaCreate() {
     setShowPersonaPicker(false);
     setShowPersonaCreate(true);
+    setDeleteMode(false); // Exit deletion mode when showing create form
   }
 
   function handlePersonaCreated() {
@@ -317,6 +321,7 @@ export default function ChatView() {
   function handleCancelPersonaCreate() {
     setShowPersonaCreate(false);
     setShowPersonaPicker(true);
+    setDeleteMode(false); // Exit deletion mode when canceling create
   }
 
   function handleDeleteClick() {
@@ -421,6 +426,7 @@ export default function ChatView() {
   function cancelPersonaDeletion() {
     setShowConfirmDeletePersona(false);
     setPersonaToDelete(null);
+    setDeleteMode(false); // Exit deletion mode when canceling persona deletion
   }
 
   function handleConversationsUpdate(updatedList) {
