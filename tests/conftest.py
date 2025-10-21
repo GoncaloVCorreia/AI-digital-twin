@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session
 os.environ.setdefault("ENV", "test")
 os.environ.setdefault("GROQ_API_KEY", "dummy-key")
 os.environ.setdefault("JWT_SECRET_KEY", "dummy-secret")
+os.environ.setdefault("SECRET_API_KEY", "test-secret-api-key")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 from app.database import Base, get_db
