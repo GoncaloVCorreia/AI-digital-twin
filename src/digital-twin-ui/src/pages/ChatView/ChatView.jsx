@@ -48,6 +48,9 @@ export default function ChatView() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("username");
     localStorage.removeItem("id");
+    localStorage.removeItem("currentSessionId");
+    sessionStorage.removeItem("showPersonaPicker");
+    sessionStorage.removeItem("showPersonaCreate"); // Clear persona create state on logout
     navigate("/login");
   }
   const navigate = useNavigate();
@@ -72,6 +75,9 @@ export default function ChatView() {
     const token = localStorage.getItem("access_token");
     const storedUsername = localStorage.getItem("username");
     const interviewerId = localStorage.getItem("id");
+    const storedSessionId = localStorage.getItem("currentSessionId");
+    const storedShowPersonaPicker = sessionStorage.getItem("showPersonaPicker");
+    const storedShowPersonaCreate = sessionStorage.getItem("showPersonaCreate");
     
     // Check auth first
     if (!token || !interviewerId) {
@@ -112,11 +118,9 @@ export default function ChatView() {
           console.log("Conversations data received:", conversationsData);
         } catch (convErr) {
           console.log("No conversations found or error fetching conversations:", convErr);
-          // If 404, it just means no conversations exist yet - not an error
           if (convErr.message.includes("404") || convErr.message.includes("Erro ao carregar conversas")) {
             conversationsData = [];
           } else {
-            // For other errors, rethrow
             throw convErr;
           }
         }
@@ -126,20 +130,59 @@ export default function ChatView() {
         const convList = conversationsData || [];
         setConversations(convList);
         
-        if (convList.length > 0) {
-          const sorted = [...convList].sort((a, b) => {
-            const ta = new Date(a.created_at || a.updated_at || 0).getTime();
-            const tb = new Date(b.created_at || b.updated_at || 0).getTime();
-            return tb - ta;
-          });
-          setCurrentSessionId(sorted[0].session_id);
+        // Check if persona create form should be shown (was user creating a persona before refresh?)
+        if (storedShowPersonaCreate === "true") {
+          console.log("Restoring persona create form state");
+          setShowPersonaCreate(true);
           setShowPersonaPicker(false);
+          // Keep the stored session ID so the conversation stays selected in sidebar
+          if (storedSessionId && convList.some(c => c.session_id === storedSessionId)) {
+            setCurrentSessionId(storedSessionId);
+          }
+          setCurrentConversation(null);
+          setSelectedPersona(null);
+        } else if (storedShowPersonaPicker === "true") {
+          console.log("Restoring persona picker state");
+          setShowPersonaPicker(true);
+          setShowPersonaCreate(false);
+          // Keep the stored session ID so the conversation stays selected in sidebar
+          if (storedSessionId && convList.some(c => c.session_id === storedSessionId)) {
+            setCurrentSessionId(storedSessionId);
+          }
+          setCurrentConversation(null);
+          setSelectedPersona(null);
+        } else if (convList.length > 0) {
+          // Check if stored session exists in current conversations
+          const storedConvExists = storedSessionId && convList.some(c => c.session_id === storedSessionId);
+          
+          if (storedConvExists) {
+            // Restore the previously viewed conversation
+            console.log("Restoring stored session:", storedSessionId);
+            setCurrentSessionId(storedSessionId);
+          } else {
+            // If stored session doesn't exist, use most recent
+            const sorted = [...convList].sort((a, b) => {
+              const ta = new Date(a.created_at || a.updated_at || 0).getTime();
+              const tb = new Date(b.created_at || b.updated_at || 0).getTime();
+              return tb - ta;
+            });
+            setCurrentSessionId(sorted[0].session_id);
+            localStorage.setItem("currentSessionId", sorted[0].session_id);
+          }
+          setShowPersonaPicker(false);
+          setShowPersonaCreate(false);
+          sessionStorage.removeItem("showPersonaPicker");
+          sessionStorage.removeItem("showPersonaCreate");
         } else {
           console.log("No conversations, showing persona picker with personas:", personasArray);
           setShowPersonaPicker(true);
+          setShowPersonaCreate(false);
           setCurrentSessionId(null);
           setCurrentConversation(null);
           setSelectedPersona(null);
+          sessionStorage.setItem("showPersonaPicker", "true");
+          sessionStorage.removeItem("showPersonaCreate");
+          localStorage.removeItem("currentSessionId");
         }
       } catch (err) {
         console.error("Erro ao carregar dados iniciais:", err);
@@ -206,7 +249,18 @@ export default function ChatView() {
     setCurrentSessionId(sessionId);
     setShowPersonaPicker(false);
     setShowPersonaCreate(false);
-    setDeleteMode(false); // Exit deletion mode when selecting a conversation
+    setDeleteMode(false);
+    
+    // Clear persona picker state when selecting a conversation
+    sessionStorage.removeItem("showPersonaPicker");
+    
+    // Store the selected session in localStorage
+    if (sessionId) {
+      localStorage.setItem("currentSessionId", sessionId);
+    } else {
+      localStorage.removeItem("currentSessionId");
+    }
+    
     const conv = conversations.find((c) => c.session_id === sessionId);
     if (conv && conv.persona) {
       setSelectedPersona(conv.persona);
@@ -265,6 +319,8 @@ export default function ChatView() {
       }
       if (newConv) {
         setCurrentSessionId(newConv.session_id);
+        localStorage.setItem("currentSessionId", newConv.session_id);
+        sessionStorage.removeItem("showPersonaPicker"); // Clear persona picker state when chat is created
         setSelectedPersona(newConv.persona);
         if (newConv.session_id) {
           const conv = await fetchConversationBySessionId(newConv.session_id);
@@ -281,26 +337,34 @@ export default function ChatView() {
   async function handleNewChatButton() {
     setShowPersonaPicker(true);
     setShowPersonaCreate(false);
-    setDeleteMode(false); // Exit deletion mode when clicking New Chat
+    setDeleteMode(false);
+    sessionStorage.setItem("showPersonaPicker", "true");
+    // Don't clear currentSessionId - keep it so conversation stays selected in sidebar
   }
 
   async function handlePersonaPick(persona) {
     setShowPersonaPicker(false);
-    setDeleteMode(false); // Exit deletion mode when picking a persona
+    setDeleteMode(false);
     setIsCreatingChat(true);
+    sessionStorage.removeItem("showPersonaPicker"); // Clear when persona is picked
     await handleNewChat(persona);
   }
 
   function handleShowPersonaCreate() {
     setShowPersonaPicker(false);
     setShowPersonaCreate(true);
-    setDeleteMode(false); // Exit deletion mode when showing create form
+    setDeleteMode(false);
+    sessionStorage.setItem("showPersonaCreate", "true");
+    sessionStorage.removeItem("showPersonaPicker");
+    // Don't clear currentSessionId - keep it so conversation stays selected in sidebar
   }
 
   function handlePersonaCreated() {
     setShowPersonaCreate(false);
     setShowPersonaPicker(true);
     setShowPersonaCreatedPopup(true);
+    sessionStorage.setItem("showPersonaPicker", "true");
+    sessionStorage.removeItem("showPersonaCreate"); // Clear create form state on success
     setTimeout(() => setShowPersonaCreatedPopup(false), 2000);
     // Reload personas after creating a new one
     console.log("Reloading personas after creation...");
@@ -321,7 +385,9 @@ export default function ChatView() {
   function handleCancelPersonaCreate() {
     setShowPersonaCreate(false);
     setShowPersonaPicker(true);
-    setDeleteMode(false); // Exit deletion mode when canceling create
+    setDeleteMode(false);
+    sessionStorage.setItem("showPersonaPicker", "true");
+    sessionStorage.removeItem("showPersonaCreate"); // Clear create form state on cancel
   }
 
   function handleDeleteClick() {
@@ -389,6 +455,7 @@ export default function ChatView() {
       setSelectedPersona(null);
       setShowPersonaPicker(true);
       setDeleteMode(false);
+      sessionStorage.setItem("showPersonaPicker", "true"); // Store state after deletion
 
       // Show success message
       setShowPersonaDeletedPopup(true);
@@ -405,7 +472,8 @@ export default function ChatView() {
   function cancelPersonaDeletion() {
     setShowConfirmDeletePersona(false);
     setPersonaToDelete(null);
-    setDeleteMode(false); // Exit deletion mode when canceling persona deletion
+    setDeleteMode(false);
+    // Don't clear showPersonaPicker state here - keep it
   }
 
   function handleConversationsUpdate(updatedList) {
@@ -418,6 +486,8 @@ export default function ChatView() {
       setCurrentSessionId(null);
       setCurrentConversation(null);
       setSelectedPersona(null);
+      localStorage.removeItem("currentSessionId");
+      sessionStorage.setItem("showPersonaPicker", "true"); // Store state when no conversations
     }
   }
 
