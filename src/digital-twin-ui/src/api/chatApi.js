@@ -1,10 +1,5 @@
-// Use a variável de ambiente ou fallback seguro para desenvolvimento
 const BASE_URL = process.env.REACT_APP_API_URL || "https://ai-digital-twin-production.up.railway.app";
-
-// Log para debug (remover em produção)
-if (process.env.NODE_ENV === 'development') {
-  console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
-}
+console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
 
 function getAuthHeader() {
   // Force a fresh read every time
@@ -115,7 +110,8 @@ export async function sendMessageToAPI(sessionId, persona, message) {
 }
 
 export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality,data_path) {
-  const response = await fetch(`${BASE_URL}/personas`, {
+  console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
+  const response = await fetch(`${BASE_URL}/personas/`, {
     method: "POST",
     headers: {
       ...getAuthHeader(),
