@@ -10,12 +10,12 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.interviewers import User, UserCreate, Token
 from app.services.interviewers_service import AuthService
-from app.utils.security import create_access_token, verify_token
+from app.utils.security import create_access_token, verify_token, verify_api_key
 from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-@router.post("/register", response_model=User, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=User, status_code=status.HTTP_201_CREATED, dependencies=[Depends(verify_api_key)])
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     """Register a new user."""
     # Check if user already exists
@@ -33,7 +33,7 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     
     return AuthService.create_user(db, user)
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, dependencies=[Depends(verify_api_key)])
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
