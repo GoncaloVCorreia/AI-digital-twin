@@ -1,4 +1,5 @@
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+const BASE_URL = process.env.REACT_APP_API_URL || "https://ai-digital-twin-production.up.railway.app";
+console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
 
 function getAuthHeader() {
   // Force a fresh read every time
@@ -9,7 +10,9 @@ function getAuthHeader() {
     console.trace(); // Show where this was called from
   }
   
-  console.log("🔑 Using token for API call:", token ? `${token.substring(0, 20)}...` : "NO TOKEN");
+  if (process.env.NODE_ENV === 'development') {
+    console.log("🔑 Using token for API call:", token ? `${token.substring(0, 20)}...` : "NO TOKEN");
+  }
   
   return {
     Authorization: `Bearer ${token || ""}`,
@@ -107,7 +110,7 @@ export async function sendMessageToAPI(sessionId, persona, message) {
 }
 
 export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality,data_path,avatar) {
-  const response = await fetch(`${BASE_URL}/personas`, {
+  const response = await fetch(`${BASE_URL}/personas/`, {
     method: "POST",
     headers: {
       ...getAuthHeader(),
@@ -139,7 +142,7 @@ export async function createNewPersona(name,age,location,description,education,t
 
 export async function fetchAllPersonas() {
   console.log("📞 Fetching all personas");
-  const response = await fetch(`${BASE_URL}/personas`, {
+  const response = await fetch(`${BASE_URL}/personas/`, {
     method: "GET",
     headers: {
       ...getAuthHeader(),
