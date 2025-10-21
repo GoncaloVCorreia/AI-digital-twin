@@ -10,6 +10,7 @@ export default function Register() {
     full_name: "",
     email: "",
     password: "",
+    secret_key: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -26,20 +27,30 @@ export default function Register() {
     setError("");
 
     try {
+      const { secret_key, ...formData } = form;
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/auth/register`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${secret_key}`,
           },
-          body: JSON.stringify(form),
+          body: JSON.stringify(formData),
         }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle validation errors from FastAPI
+        if (data.detail && Array.isArray(data.detail) && data.detail.length > 0) {
+          let errorMsg = data.detail[0].msg || "Validation error";
+          // Remove "Value error, " prefix if present
+          errorMsg = errorMsg.replace(/^Value error,\s*/i, '');
+          throw new Error(errorMsg);
+        }
         throw new Error(data.detail || data.message || "Erro no registo");
       }
 
@@ -76,7 +87,7 @@ export default function Register() {
           type="text"
           name="full_name"
           placeholder="Full name"
-          value={form.name}
+          value={form.full_name}
           onChange={handleChange}
           required
         />
@@ -93,6 +104,14 @@ export default function Register() {
           name="password"
           placeholder="Password"
           value={form.password}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="secret_key"
+          placeholder="Secret Key"
+          value={form.secret_key}
           onChange={handleChange}
           required
         />
