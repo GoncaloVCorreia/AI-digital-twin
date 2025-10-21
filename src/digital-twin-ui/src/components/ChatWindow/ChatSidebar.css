@@ -1,8 +1,8 @@
 .chat-sidebar {
   width: 250px;
-  background: #f8f8f8;
-  border-left: 1px solid #ddd;
-  border-top: 1px solid #ddd;
+  background: var(--sidebar-bg);
+  border-left: 1px solid var(--border-secondary);
+  border-top: 1px solid var(--border-secondary);
   padding: 18px 12px 12px 12px;
   overflow-y: auto;
   display: flex;
@@ -13,6 +13,7 @@
   text-align: right;
   border-radius: 0 10px 10px 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .chat-sidebar ul {
@@ -27,8 +28,8 @@
   margin-bottom: 8px;
   border-radius: 14px;
   border: none;
-  background: #f1f1f1;
-  color: #222;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 1rem;
   text-align: right;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
@@ -57,8 +58,8 @@
 
 /* Hover effect for non-selected items */
 .chat-sidebar ul li:hover:not(.selected):not(.always-selected) {
-  background: #e3e9f9;
-  color: #222;
+  background: var(--border-color);
+  color: var(--text-primary);
 }
 
 @keyframes fadeInBubble {
@@ -97,7 +98,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 18px 0;
-  color: #222;
+  color: var(--text-primary);
   letter-spacing: 0.5px;
   text-align: center;
 }
@@ -106,17 +107,19 @@
   margin-bottom: 0;
   text-align: center;
   padding-bottom: 12px;
-  background: #f8f8f8;
+  background: var(--sidebar-bg);
+  transition: background 0.3s ease;
 }
 
 .sidebar-header--sticky {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #f8f8f8;
-  border-bottom: 1px solid #e3e9f9;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border-color);
   box-shadow: 0 2px 8px rgba(0,0,0,0.03);
   padding-bottom: 12px;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .sidebar-scrollable {
@@ -148,6 +151,15 @@
 
 .delete-chat-btn:focus {
   outline: none;
+}
+
+/* Add dark mode support for delete button */
+[data-theme="dark"] .delete-chat-btn svg path {
+  stroke: var(--text-secondary);
+}
+
+[data-theme="dark"] .delete-chat-btn:hover svg path {
+  stroke: #e74c3c;
 }
 
 /* Responsive: stack vertically on small screens */

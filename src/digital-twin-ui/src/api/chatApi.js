@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000/chat";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 function getAuthHeader() {
   // Force a fresh read every time
@@ -19,7 +19,7 @@ function getAuthHeader() {
 export async function fetchConversations(interviewerId) {
   console.log("📞 Fetching conversations for interviewer:", interviewerId);
   const response = await fetch(
-    `${BASE_URL}/conversations/by-interviewer/${interviewerId}`,
+    `${BASE_URL}/chat/conversations/by-interviewer/${interviewerId}`,
     {
       headers: {
         ...getAuthHeader(),
@@ -40,7 +40,7 @@ export async function fetchConversations(interviewerId) {
 export async function fetchConversationBySessionId(sessionId) {
   console.log("📞 Fetching conversation by session:", sessionId);
   try {
-    const res = await fetch(`${BASE_URL}/conversations/by-session/${sessionId}`,
+    const res = await fetch(`${BASE_URL}/chat/conversations/by-session/${sessionId}`,
     {
       headers: {
         ...getAuthHeader(),
@@ -64,7 +64,7 @@ export async function fetchConversationBySessionId(sessionId) {
 
 export async function deleteConversationBySessionId(sessionId) {
   const response = await fetch(
-    `${BASE_URL}/conversations/delete/${sessionId}`,
+    `${BASE_URL}/chat/conversations/delete/${sessionId}`,
     {
       method: "DELETE",
       headers: {  
@@ -79,7 +79,7 @@ export async function deleteConversationBySessionId(sessionId) {
 
 export async function sendMessageToAPI(sessionId, persona, message) {
   console.log("📞 Sending message to API:", { sessionId, persona, message });
-  const response = await fetch(`${BASE_URL}/respond`, {
+  const response = await fetch(`${BASE_URL}/chat/respond`, {
     method: "POST",
     headers: {
       ...getAuthHeader(), 
@@ -107,7 +107,7 @@ export async function sendMessageToAPI(sessionId, persona, message) {
 }
 
 export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality,data_path) {
-  const response = await fetch(`http://127.0.0.1:8000/personas`, {
+  const response = await fetch(`${BASE_URL}/personas`, {
     method: "POST",
     headers: {
       ...getAuthHeader(),
@@ -138,7 +138,7 @@ export async function createNewPersona(name,age,location,description,education,t
 
 export async function fetchAllPersonas() {
   console.log("📞 Fetching all personas");
-  const response = await fetch(`http://127.0.0.1:8000/personas`, {
+  const response = await fetch(`${BASE_URL}/personas`, {
     method: "GET",
     headers: {
       ...getAuthHeader(),
@@ -159,7 +159,7 @@ export async function fetchAllPersonas() {
 export async function deletePersonaById(personaId) {
   console.log("📞 Deleting persona:", personaId);
   const response = await fetch(
-    `http://127.0.0.1:8000/personas/${personaId}`,
+    `${BASE_URL}/personas/${personaId}`,
     {
       method: "DELETE",
       headers: {  

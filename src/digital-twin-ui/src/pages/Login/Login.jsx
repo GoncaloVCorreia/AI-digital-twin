@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function Login() {
+  const { darkMode, toggleDarkMode } = useTheme();
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -61,12 +63,19 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <h1>Bem-vindo de volta 👋</h1>
+      <button 
+        className="theme-toggle-btn" 
+        onClick={toggleDarkMode}
+        title={darkMode ? "Light Mode" : "Dark Mode"}
+      >
+        {darkMode ? "☀️" : "🌙"}
+      </button>
+      <h1>Welcome Back 👋</h1>
       <form onSubmit={handleSubmit} className="login-form">
         <input
           type="text"
           name="username"
-          placeholder="Nome de utilizador"
+          placeholder="Username"
           value={form.username}
           onChange={handleChange}
           required
@@ -74,20 +83,20 @@ export default function Login() {
         <input
           type="password"
           name="password"
-          placeholder="Palavra-passe"
+          placeholder="Password"
           value={form.password}
           onChange={handleChange}
           required
         />
         <button type="submit" disabled={loading}>
-          {loading ? "A entrar..." : "Entrar"}
+          {loading ? "Loggin in..." : "Log In"}
         </button>
       </form>
 
       {error && <p className="error">{error}</p>}
 
       <p className="register-link" onClick={() => navigate("/register")}>
-        Ainda não tens conta? Regista-te
+        Don't have an account? Sign up
       </p>
     </div>
   );
