@@ -28,6 +28,7 @@ services:
       DATABASE_URL: postgresql+psycopg://correia:postgres@db:5432/ai_project_db
       CHECKPOINT_URL: postgresql://correia:postgres@db:5432/ai_project_db?options=-c%20client_encoding%3DUTF8
       GROQ_API_KEY: ${GROQ_API_KEY} 
+      SECRETE_API_KEY: ${SECRETE_API_KEY}
       BACKEND_CORS_ORIGINS: '["*"]'
     ports:
       - "8000:8000"
