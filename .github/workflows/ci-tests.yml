@@ -58,7 +58,8 @@ jobs:
       - name: Run tests with coverage
         env:
           GROQ_API_KEY: gsk_fake_key_for_testing_only
-          SECRET_API_KEY: test-secret_api_key
+          SECRETE_API_KEY: test-secret-api-key  
+          SECRET_API_KEY:  test-secret-api-key
           DATABASE_URL: postgresql+psycopg://correia:postgres@localhost:5432/ai_project_db
         run: |
           uv run pytest -v --cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=80

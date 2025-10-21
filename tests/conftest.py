@@ -5,14 +5,15 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
+
 os.environ.setdefault("ENV", "test")
 os.environ.setdefault("GROQ_API_KEY", "dummy-key")
 os.environ.setdefault("JWT_SECRET_KEY", "dummy-secret")
 os.environ.setdefault("SECRET_API_KEY", "test-secret-api-key")
+os.environ.setdefault("SECRETE_API_KEY", os.environ["SECRET_API_KEY"])
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 from app.database import Base, get_db
-from app import models  
 from app.main import app
 from app.utils import dependencies  
 
@@ -95,20 +96,29 @@ def authenticated_client(client: TestClient):
         "full_name": "Test User",
         "password": "TestPass123!"
     }
-    
-    register_response = client.post("/auth/register", json=user_data)
+
+   
+    API_KEY = os.getenv("SECRETE_API_KEY") or os.getenv("SECRET_API_KEY") or "test-secret-api-key"
+
+ 
+    register_response = client.post(
+        "/auth/register",
+        json=user_data,
+        headers={"Authorization": f"Bearer {API_KEY}"},
+    )
     assert register_response.status_code in (200, 201), f"Registration failed: {register_response.text}"
-    
-    # Faz login para obter token
+
+ 
     login_response = client.post(
         "/auth/login",
-        data={"username": user_data["username"], "password": user_data["password"]}
+        data={"username": user_data["username"], "password": user_data["password"]},
+        headers={"Authorization": f"Bearer {API_KEY}"},
     )
     assert login_response.status_code == 200, f"Login failed: {login_response.text}"
     
     token = login_response.json()["access_token"]
     
-    # Retorna cliente com headers de autenticação
+   
     class AuthenticatedClient:
         def __init__(self, client, token):
             self._client = client
