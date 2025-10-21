@@ -8,8 +8,11 @@ COPY package*.json ./
 RUN npm install
 
 # Copy project and build static assets
+# bring in production env for CRA to read
+COPY .env.production ./
+
 COPY . .
-RUN npm run build
+RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL" && npm run build
 
 # ---------- Serve stage ----------
 FROM nginx:alpine
