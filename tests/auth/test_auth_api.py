@@ -1,17 +1,30 @@
 """Testes para endpoints de autenticação."""
+
+# Constante para o API key de testes
+TEST_API_KEY = "test-secret-api-key"
+
+
 def _register(client, email="user@demo.com", username="demo", password="Abcdefg1!"):
     """Helper para registar utilizador."""
-    return client.post("/auth/register", json={
-        "email": email,
-        "username": username,
-        "full_name": username.title(),
-        "password": password,
-    })
+    return client.post(
+        "/auth/register",
+        json={
+            "email": email,
+            "username": username,
+            "full_name": username.title(),
+            "password": password,
+        },
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
 
 
 def _login(client, username="demo", password="Abcdefg1!"):
     """Helper para fazer login."""
-    return client.post("/auth/login", data={"username": username, "password": password})
+    return client.post(
+        "/auth/login",
+        data={"username": username, "password": password},
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
 
 
 def test_register_success(client):
@@ -78,7 +91,11 @@ def test_login_invalid_password(client):
 
 def test_login_empty_credentials(client):
     """Testa login com credenciais vazias."""
-    response = client.post("/auth/login", data={"username": "", "password": ""})
+    response = client.post(
+        "/auth/login",
+        data={"username": "", "password": ""},
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
     assert response.status_code in (400, 401, 422)
 
 
@@ -129,56 +146,76 @@ def test_token_contains_required_fields(client):
 
 def test_register_invalid_email_format(client):
     """Testa registo com email inválido."""
-    response = client.post("/auth/register", json={
-        "email": "not_an_email",
-        "username": "testuser",
-        "full_name": "Test User",
-        "password": "Abcdefg1!"
-    })
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "not_an_email",
+            "username": "testuser",
+            "full_name": "Test User",
+            "password": "Abcdefg1!"
+        },
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
     assert response.status_code == 422  
 
 
 def test_register_password_too_short(client):
     """Testa registo com password muito curta."""
-    response = client.post("/auth/register", json={
-        "email": "short@test.com",
-        "username": "shortpass",
-        "full_name": "Short Pass",
-        "password": "Short1!"  
-    })
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "short@test.com",
+            "username": "shortpass",
+            "full_name": "Short Pass",
+            "password": "Short1!"  
+        },
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
     assert response.status_code == 422
 
 
 def test_register_password_no_uppercase(client):
     """Testa registo com password sem maiúsculas."""
-    response = client.post("/auth/register", json={
-        "email": "nouppercase@test.com",
-        "username": "nouppercase",
-        "full_name": "No Upper",
-        "password": "abcdefg1!" 
-    })
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "nouppercase@test.com",
+            "username": "nouppercase",
+            "full_name": "No Upper",
+            "password": "abcdefg1!" 
+        },
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
     assert response.status_code == 422
 
 
 def test_register_password_no_digit(client):
     """Testa registo com password sem dígitos."""
-    response = client.post("/auth/register", json={
-        "email": "nodigit@test.com",
-        "username": "nodigit",
-        "full_name": "No Digit",
-        "password": "Abcdefgh!"  # sem números
-    })
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "nodigit@test.com",
+            "username": "nodigit",
+            "full_name": "No Digit",
+            "password": "Abcdefgh!"  # sem números
+        },
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
     assert response.status_code == 422
 
 
 def test_register_username_too_short(client):
     """Testa registo com username muito curto."""
-    response = client.post("/auth/register", json={
-        "email": "shortuser@test.com",
-        "username": "ab",  
-        "full_name": "Short User",
-        "password": "Abcdefg1!"
-    })
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "shortuser@test.com",
+            "username": "ab",  
+            "full_name": "Short User",
+            "password": "Abcdefg1!"
+        },
+        headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+    )
     assert response.status_code == 422
 
 
@@ -199,3 +236,41 @@ def test_multiple_users_can_login_independently(client):
     
     # Tokens devem ser diferentes
     assert token1 != token2
+
+
+def test_register_without_api_key(client):
+    """Testa que register sem API key retorna 403."""
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "nokey@test.com",
+            "username": "nokey",
+            "full_name": "No Key",
+            "password": "Abcdefg1!"
+        }
+    )
+    assert response.status_code == 403
+
+
+def test_login_without_api_key(client):
+    """Testa que login sem API key retorna 403."""
+    response = client.post(
+        "/auth/login",
+        data={"username": "test", "password": "test"}
+    )
+    assert response.status_code == 403
+
+
+def test_register_with_invalid_api_key(client):
+    """Testa que register com API key inválida retorna 401."""
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "badkey@test.com",
+            "username": "badkey",
+            "full_name": "Bad Key",
+            "password": "Abcdefg1!"
+        },
+        headers={"Authorization": "Bearer wrong-key-here"}
+    )
+    assert response.status_code == 401
