@@ -10,7 +10,9 @@ function getAuthHeader() {
     console.trace(); // Show where this was called from
   }
   
-  console.log("🔑 Using token for API call:", token ? `${token.substring(0, 20)}...` : "NO TOKEN");
+  if (process.env.NODE_ENV === 'development') {
+    console.log("🔑 Using token for API call:", token ? `${token.substring(0, 20)}...` : "NO TOKEN");
+  }
   
   return {
     Authorization: `Bearer ${token || ""}`,
