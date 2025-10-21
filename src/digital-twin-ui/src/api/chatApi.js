@@ -109,8 +109,7 @@ export async function sendMessageToAPI(sessionId, persona, message) {
   return await response.json();
 }
 
-export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality,data_path) {
-  console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
+export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality,data_path,avatar) {
   const response = await fetch(`${BASE_URL}/personas/`, {
     method: "POST",
     headers: {
@@ -130,7 +129,8 @@ export async function createNewPersona(name,age,location,description,education,t
       goals,
       hobbies,
       personality,
-      data_path
+      data_path,
+      avatar  // Add this line
     }),
   });
   if (!response.ok) {

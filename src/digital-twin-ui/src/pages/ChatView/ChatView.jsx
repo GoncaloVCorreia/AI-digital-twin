@@ -383,32 +383,11 @@ export default function ChatView() {
       // Update conversations state
       setConversations(updatedList);
       
-      // Handle UI state based on remaining conversations
-      if (updatedList.length === 0) {
-        // No conversations left, show persona picker
-        setCurrentSessionId(null);
-        setCurrentConversation(null);
-        setSelectedPersona(null);
-        setShowPersonaPicker(true);
-      } else {
-        // Check if current conversation was deleted
-        const currentConvDeleted = conversationsToDelete.some(
-          conv => conv.session_id === currentSessionId
-        );
-        
-        if (currentConvDeleted) {
-          // Select the first remaining conversation
-          const sorted = [...updatedList].sort((a, b) => {
-            const ta = new Date(a.created_at || a.updated_at || 0).getTime();
-            const tb = new Date(b.created_at || b.updated_at || 0).getTime();
-            return tb - ta;
-          });
-          setCurrentSessionId(sorted[0].session_id);
-          setSelectedPersona(sorted[0].persona);
-          setShowPersonaPicker(false);
-        }
-      }
-      
+      // Always show persona picker after deletion and clear current selection
+      setCurrentSessionId(null);
+      setCurrentConversation(null);
+      setSelectedPersona(null);
+      setShowPersonaPicker(true);
       setDeleteMode(false);
 
       // Show success message
