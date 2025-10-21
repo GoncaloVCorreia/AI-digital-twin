@@ -7,3 +7,6 @@ __pycache__/
 
 test.db
 .coverage
+
+.env
+.env.local
