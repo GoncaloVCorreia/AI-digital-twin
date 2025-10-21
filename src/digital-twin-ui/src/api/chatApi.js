@@ -1,4 +1,5 @@
 const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
 
 function getAuthHeader() {
   // Force a fresh read every time
@@ -107,6 +108,7 @@ export async function sendMessageToAPI(sessionId, persona, message) {
 }
 
 export async function createNewPersona(name,age,location,description,education,tech_skills,soft_skills,strenghts,weaknesses,goals,hobbies,personality,data_path) {
+  console.log("BASE_URL =", process.env.REACT_APP_API_URL, "→ using:", BASE_URL);
   const response = await fetch(`${BASE_URL}/personas`, {
     method: "POST",
     headers: {
