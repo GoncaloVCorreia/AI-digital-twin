@@ -33,13 +33,13 @@ class PersonaBase(BaseModel):
     education: str = Field(..., min_length=1, max_length=MAX_LEN)
     tech_skills: str = Field(..., min_length=1, max_length=MAX_LEN)
     soft_skills: str = Field(..., min_length=1, max_length=MAX_LEN)
-    # Kept original column name "strenghts" to match DB
     strenghts: str = Field(..., min_length=1, max_length=MAX_LEN)
     weaknesses: str = Field(..., min_length=1, max_length=MAX_LEN)
     goals: str = Field(..., min_length=1, max_length=MAX_LEN)
     hobbies: str = Field(..., min_length=1, max_length=MAX_LEN)
     personality: str = Field(..., min_length=1, max_length=MAX_LEN)
     data_path: Optional[str] = Field("",  max_length=MAX_LEN)
+    avatar: Optional[str] = Field("default", max_length=256)  # Add this line
 
     @field_validator(
         "name",
@@ -72,6 +72,14 @@ class PersonaBase(BaseModel):
         if isinstance(v, str):
             return v.strip()
         return v
+    @field_validator("avatar", mode="before")
+    @classmethod
+    def normalize_avatar(cls, v: Union[str, None]) -> str:
+        if v is None:
+            return "default"
+        if isinstance(v, str):
+            return v.strip() or "default"
+        return "default"
 
 
 class PersonaCreate(PersonaBase):
@@ -94,6 +102,7 @@ class PersonaUpdate(BaseModel):
     hobbies: Optional[str] = Field(None, min_length=1, max_length=MAX_LEN)
     personality: Optional[str] = Field(None, min_length=1, max_length=MAX_LEN)
     data_path: Optional[str] = Field(None, max_length=MAX_LEN)
+    avatar: Optional[str] = Field(None, max_length=256)  # Add this line
 
 
 class Persona(PersonaBase):

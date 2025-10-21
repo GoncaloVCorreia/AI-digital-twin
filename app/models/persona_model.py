@@ -14,7 +14,8 @@ CREATE TABLE personas (
     weaknesses  VARCHAR(512) NOT NULL,
     goals       VARCHAR(512) NOT NULL,
     hobbies     VARCHAR(512) NOT NULL,
-    personality VARCHAR(512) NOT NULL
+    personality VARCHAR(512) NOT NULL,
+    avatar      VARCHAR(256) NOT NULL
 )
 """
 
@@ -40,14 +41,15 @@ class Persona(Base):
     education = Column(String(512), nullable=False)
     tech_skills = Column(String(512), nullable=False)
     soft_skills = Column(String(512), nullable=False)
-    strenghts = Column(String(512), nullable=False)   # spelled as in your DDL
+    strenghts = Column(String(512), nullable=False)
     weaknesses = Column(String(512), nullable=False)
     goals = Column(String(512), nullable=False)
     hobbies = Column(String(512), nullable=False)
     personality = Column(String(512), nullable=False)
+    avatar = Column(String(256), nullable=True, server_default="default")
     data_path = Column(String(1024), nullable=True, server_default="")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-   
+
 

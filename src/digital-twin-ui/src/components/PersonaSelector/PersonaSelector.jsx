@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { getAvatarUrl } from "../../utils/avatarUtils";
 import "./PersonaSelector.css";
 
 export default function PersonaSelector({ selected, setSelected, horizontal, persona, showAddButton, onAddClick, personas = [], disabled = false, deleteMode = false, onDeleteClick, onPersonaDelete }) {
@@ -14,13 +15,6 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
   // Usa persona como fallback se selected estiver null/undefined
   const personaName = selected || persona;
   const personaToShow = personasArray.find((p) => p.name?.toLowerCase() === personaName?.toLowerCase());
-
-  // Helper function to get avatar URL with fallback
-  const getAvatarUrl = (personaName) => {
-    const avatarPath = `/avatars/${personaName?.toLowerCase()}.png`;
-    // Try to use persona-specific avatar, fallback to default.png
-    return avatarPath;
-  };
 
   // Handle image error by falling back to default
   const handleImageError = (e) => {
@@ -69,7 +63,7 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
                     style={{ cursor: disabled ? 'not-allowed' : (deleteMode ? 'pointer' : 'pointer'), opacity: disabled ? 0.6 : 1 }}
                   >
                     <img
-                      src={getAvatarUrl(p.name)}
+                      src={getAvatarUrl(p)}
                       alt={p.name}
                       className="persona-avatar"
                       onError={handleImageError}
@@ -95,7 +89,7 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
                   <span className="persona-name">Add</span>
                 </div>
               )}
-              {showAddButton && (
+              {showAddButton && personasArray.length > 0 && (
                 <div
                   className={`persona-circle persona-delete-circle${disabled ? " disabled" : ""}${deleteMode ? " active" : ""}`}
                   onClick={() => !disabled && onDeleteClick && onDeleteClick()}
@@ -120,7 +114,7 @@ export default function PersonaSelector({ selected, setSelected, horizontal, per
                 className="persona-circle active"
               >
                 <img
-                  src={getAvatarUrl(personaToShow.name)}
+                  src={getAvatarUrl(personaToShow)}
                   alt={personaToShow.name}
                   className="persona-avatar"
                   style={{
