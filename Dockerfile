@@ -23,7 +23,11 @@ COPY pyproject.toml ./
 COPY uv.lock* ./
 
 # Sync deps into a local venv; if uv.lock is present, it will be used; else it resolves fresh.
-RUN uv sync --no-dev --python 3.12
+RUN PIP_INDEX_URL=https://pypi.org/simple \
+    PIP_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cpu \
+    PIP_PREFER_BINARY=1 \
+    CUDA_VISIBLE_DEVICES="" \
+    uv sync --no-dev --python 3.12
 
 # Make the venv available on PATH
 ENV PATH="/app/.venv/bin:$PATH"
