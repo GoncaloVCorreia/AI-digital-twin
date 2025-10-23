@@ -12,7 +12,9 @@ os.environ.setdefault("JWT_SECRET_KEY", "dummy-secret")
 os.environ.setdefault("SECRET_API_KEY", "test-secret-api-key")
 os.environ.setdefault("SECRETE_API_KEY", os.environ["SECRET_API_KEY"])
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
-
+os.environ.setdefault("LANGSMITH_TRACING_V2", "false")
+os.environ.setdefault("LANGSMITH_PROJECT", "test-project")
+os.environ.setdefault("LANGSMITH_API_KEY", "dummy-langsmith-key")
 from app.database import Base, get_db
 from app.main import app
 from app.utils import dependencies  
