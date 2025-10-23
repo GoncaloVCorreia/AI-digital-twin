@@ -9,6 +9,7 @@ import os
 import logging, time, sys
 from langgraph.prebuilt import create_react_agent
 from src.tools import get_user_repo_summary, get_date, calories_burned, average_calories_per_day, max_daily_calories, longest_run, average_steps_per_day, max_steps_day
+from langsmith import Client
 
 log = logging.getLogger("chat")
 handler = logging.StreamHandler(sys.stdout)
@@ -17,6 +18,8 @@ handler.setFormatter(formatter)
 log.addHandler(handler)
 log.setLevel(logging.INFO)
 log.propagate = True
+
+client = Client()
 
 CHECKPOINT_URL = os.getenv(
     "CHECKPOINT_URL",

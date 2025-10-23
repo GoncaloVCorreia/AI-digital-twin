@@ -19,9 +19,12 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     ALGORITHM: str = "HS256"
+    LANGSMITH_TRACING_V2: str
+    LANGSMITH_PROJECT: str 
+    LANGSMITH_API_KEY: str
     GROQ_API_KEY: str
     SECRETE_API_KEY: str
-    
+   
     # Database
     DATABASE_URL: Optional[str] = "sqlite:///./task_management.db"
     
