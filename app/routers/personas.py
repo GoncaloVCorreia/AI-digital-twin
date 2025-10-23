@@ -19,7 +19,7 @@ from app.schemas.persona import (
     PaginatedResponse,
 )
 from app.services.persona_service import PersonaService
-
+from app.logging_config import logger
 router = APIRouter(prefix="/personas", tags=["personas"])
 
 
@@ -27,10 +27,15 @@ router = APIRouter(prefix="/personas", tags=["personas"])
 def create_persona(payload: PersonaCreate, 
                    db: Session = Depends(get_db),
                    current_user: User = Depends(get_current_user)):
+    logger.info("persona.create.requested", extra={"user_id": current_user.id, "persona_name": payload.name})
+    
     try:
         created = PersonaService.create_persona(db, payload, current_user.id)
+        logger.info("persona.create.succeeded", extra={"user_id": current_user.id, "persona_id": created.id})        
         return created
     except IntegrityError:
+        logger.info("persona.create.conflict", extra={"user_id": current_user.id, "persona_name": payload.name})
+
         # If you later add a UNIQUE constraint (e.g., name) we surface 409 here.
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -78,7 +83,11 @@ def update_persona(
 ):
     updated = PersonaService.update_persona(db, persona_id, payload)
     if not updated:
+        logger.info("persona.get.not_found", extra={"user_id": current_user.id, "persona_id": persona_id})
+
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Persona not found")
+    logger.info("persona.update.succeeded", extra={"user_id": current_user.id, "persona_id": persona_id})
+    
     return updated
 
 
@@ -89,6 +98,10 @@ def delete_persona(persona_id: int,
 ):
     ok = PersonaService.delete_persona(db, persona_id)
     if not ok:
+        logger.info("persona.delete.not_found", extra={"user_id": current_user.id, "persona_id": persona_id})
+
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Persona not found")
+    logger.info("persona.delete.succeeded", extra={"user_id": current_user.id, "persona_id": persona_id})
+    
     return ok
     
