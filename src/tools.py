@@ -10,7 +10,9 @@ import duckdb
 from datetime import datetime
 from pathlib import Path
 from typing import Union, Dict, Any
-
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_community.retrievers import BM25Retriever
 
 def _connect(path:str) -> duckdb.DuckDBPyConnection:
     """Create an in-memory DuckDB connection and expose a 'health' view over all parquet files."""
@@ -356,3 +358,72 @@ def get_user_repo_summary(username: str, token: Optional[str] = None) -> Dict[st
         "repos": repos_min,
         "top_languages": top_languages,
     }
+
+@tool
+def query_knowledge_base_thesis(
+    path: str = None,
+    collection_name: str =None,
+    query: str ="",
+) -> List[str]:
+    """
+    Tool that gives information about the thesis of the user by querying a knowledge base.
+    Tool that performs hybrid retrieval (BM25 + dense vector search) on a Chroma collection.
+    
+    Args:
+        path: path to the Chroma persist directory
+        collection_name: name of the collection to query
+        query: what user wants to know about the thesis
+    
+    Returns:
+        List[str]: list of document contents (page_content from each result)
+    """
+    if path is None:
+        path ="./chroma_data"
+    if collection_name is None:
+        collection_name ="goncalo_thesis"
+    
+    EMBED_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+    
+    def build_dense_retriever(k_val):
+        emb = HuggingFaceEmbeddings(
+            model_name=EMBED_MODEL_NAME,
+            encode_kwargs={"normalize_embeddings": True},
+        )
+        vs = Chroma(
+            collection_name=collection_name,
+            embedding_function=emb,
+            persist_directory=path,
+        )
+        return vs.as_retriever(
+            search_type="mmr",
+            search_kwargs={
+                "k": k_val,
+                "fetch_k": max(20, 4 * k_val),
+                "lambda_mult": 0.75
+            }
+        )
+    
+    def build_bm25_retriever(k_val, q):
+        dense = build_dense_retriever(k_val)
+        docs = dense.invoke(q)
+        bm25 = BM25Retriever.from_documents(docs)
+        bm25.k = k_val
+        return bm25
+    
+    def hybrid_query(q, k_val):
+        bm25 = build_bm25_retriever(k_val, q)
+        bm25_results = bm25.invoke(q)
+        
+        if bm25_results:
+            dense = build_dense_retriever(k_val)
+            dense_results = dense.invoke(q)
+            combined_results = bm25_results + dense_results
+            return combined_results[:k_val]
+        
+        return []
+    
+    # Perform the hybrid query
+    results = hybrid_query(query, 5)
+    
+    # Return just the page_content strings
+    return [doc.page_content for doc in results]

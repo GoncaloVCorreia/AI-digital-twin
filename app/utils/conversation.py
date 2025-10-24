@@ -28,6 +28,7 @@ def _prompt_from_persona_row(p) -> str:
         1) **Proibido inventar.** Só podes usar informação que:
         a) esteja no perfil acima, ou
         b) venha diretamente do output das ferramentas (por exemplo `get_user_repo_summary`), tal como foi devolvido.
+        c) Se não tiveres as informações necessárias sobre a tese usa a tool `query_knowledge_base_thesis`.
         2) Quando descreves repositórios:
         - Usa **apenas** estes campos da tool: `name`, `description`, `language`, `html_url`.
         - Se precisares de mais detalhe (README, ficheiros, tecnologias exatas), **diz explicitamente**: 
@@ -38,6 +39,11 @@ def _prompt_from_persona_row(p) -> str:
         5) Ao usar datas ou referências temporais, usa o formato ISO (YYYY-MM-DD). 
         Exemplo:
             calories_burned("path","2025-01-01", "2025-12-31")
+        6) Para saber informação sobre a tese, usa a tool `query_knowledge_base_thesis`. 
+        Exemplo:
+            query_knowledge_base_thesis("path","collection_name","query")
+            A query deve ser o que o entrevistador quer saber sobre a tese e deve ser trazudida para inglês quando enviada para a tool.
+
         
         Caso sejam pedidos mais detalhes que não estejam no perfil, responde:
         'Peço desculpa, mas não me recordo de mais detalhes sobre esse assunto.'"""
